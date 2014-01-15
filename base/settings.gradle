@@ -1,0 +1,73 @@
+include 'ant-tasks'
+include 'archquery'
+include 'asset-studio'
+include 'common'
+include 'ddmlib'
+include 'draw9patch'
+include 'dvlib'
+include 'fat32lib'
+include 'jobb'
+include 'layoutlib-api'
+include 'lint'
+include 'lint-api'
+include 'lint-checks'
+include 'manifest-merger'
+include 'ninepatch'
+include 'rule-api'
+include 'screenshot2'
+include 'sdk-common'
+include 'sdklib'
+include 'sdklib-test'
+include 'testutils'
+include 'gradle-import'
+
+include 'builder-model'
+include 'builder-test-api'
+include 'builder'
+include 'gradle-model'
+include 'gradle'
+
+project(':ant-tasks'       ).projectDir = new File(rootDir, 'base/legacy/ant-tasks')
+project(':archquery'       ).projectDir = new File(rootDir, 'base/legacy/archquery')
+project(':asset-studio'    ).projectDir = new File(rootDir, 'base/asset-studio')
+project(':common'          ).projectDir = new File(rootDir, 'base/common')
+project(':ddmlib'          ).projectDir = new File(rootDir, 'base/ddmlib')
+project(':draw9patch'          ).projectDir = new File(rootDir, 'base/draw9patch')
+project(':dvlib'           ).projectDir = new File(rootDir, 'base/device_validator/dvlib')
+project(':fat32lib'        ).projectDir = new File(rootDir, 'external/fat32lib')
+project(':jobb'          ).projectDir = new File(rootDir, 'base/jobb')
+project(':layoutlib-api'          ).projectDir = new File(rootDir, 'base/layoutlib-api')
+project(':lint'            ).projectDir = new File(rootDir, 'base/lint/cli')
+project(':lint-api'        ).projectDir = new File(rootDir, 'base/lint/libs/lint-api')
+project(':lint-checks'     ).projectDir = new File(rootDir, 'base/lint/libs/lint-checks')
+project(':manifest-merger' ).projectDir = new File(rootDir, 'base/build-system/manifest-merger')
+project(':ninepatch'          ).projectDir = new File(rootDir, 'base/ninepatch')
+project(':rule-api'          ).projectDir = new File(rootDir, 'base/rule-api')
+project(':screenshot2'     ).projectDir = new File(rootDir, 'base/misc/screenshot2')
+project(':sdk-common'          ).projectDir = new File(rootDir, 'base/sdk-common')
+project(':sdklib'          ).projectDir = new File(rootDir, 'base/sdklib')
+project(':sdklib-test'     ).projectDir = new File(rootDir, 'base/sdklib')
+project(':sdklib-test'     ).buildFileName = 'test.gradle'
+project(':testutils'          ).projectDir = new File(rootDir, 'base/testutils')
+project(':gradle-import'          ).projectDir = new File(rootDir, 'base/gradle-import')
+
+project(':builder-model'   ).projectDir = new File(rootDir, 'base/build-system/builder-model')
+project(':builder-test-api').projectDir = new File(rootDir, 'base/build-system/builder-test-api')
+project(':builder'         ).projectDir = new File(rootDir, 'base/build-system/builder')
+project(':gradle-model'    ).projectDir = new File(rootDir, 'base/build-system/gradle-model')
+project(':gradle'          ).projectDir = new File(rootDir, 'base/build-system/gradle')
+
+
+include ':swt:chimpchat'
+include ':swt:ddms:app'
+include ':swt:ddms:ddmuilib'
+include ':swt:hierarchyviewer2:app'
+include ':swt:hierarchyviewer2:hierarchyviewer2lib'
+include ':swt:monkeyrunner'
+include ':swt:sdkmanager:app'
+include ':swt:sdkstats'
+include ':swt:sdkmanager:sdkuilib'
+include ':swt:swtmenubar'
+include ':swt:traceview'
+include ':swt:uiautomatorviewer'
+
