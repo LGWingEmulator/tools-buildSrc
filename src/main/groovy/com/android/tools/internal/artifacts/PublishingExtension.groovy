@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.buildsrc
-import org.gradle.api.Project
-import org.gradle.api.tasks.TaskAction
+package com.android.tools.internal.artifacts;
 
-class DownloadArtifactsTask extends BaseTask {
-
-    Project project
-    File mainRepo
-    File secondaryRepo
-
-    @TaskAction
-    public void downloadArtifacts() {
-        new ArtifactDownloader(getProject(), getMainRepo(), getSecondaryRepo()).downloadArtifacts()
-    }
+/**
+ * Extension for the project to know if the project is published or not.
+ */
+public class PublishingExtension {
+    boolean isPublished = true
 }

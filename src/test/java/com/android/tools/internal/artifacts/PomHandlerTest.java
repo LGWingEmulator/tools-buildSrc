@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.build.gradle.buildsrc;
+package com.android.tools.internal.artifacts;
 
 import com.google.common.io.ByteStreams;
 import junit.framework.TestCase;

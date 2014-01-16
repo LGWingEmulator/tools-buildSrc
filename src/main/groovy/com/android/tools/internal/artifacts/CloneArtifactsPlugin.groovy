@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.buildsrc
+package com.android.tools.internal.artifacts
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -32,7 +32,7 @@ class CloneArtifactsPlugin implements Plugin<Project> {
         Task cloneArtifacts = project.tasks.create("cloneArtifacts")
         cloneArtifacts.setDescription("Clone dependencies")
 
-        ShippingExtension shippingExtension = project.extensions.create('shipping', ShippingExtension)
+        PublishingExtension shippingExtension = project.extensions.create('publishing', PublishingExtension)
 
         Task setupTask = project.tasks.create("setupMaven")
         setupTask << {
@@ -50,7 +50,7 @@ class CloneArtifactsPlugin implements Plugin<Project> {
             def extension = project.extensions.create('cloneArtifacts', CloneArtifactsExtension)
 
             // default shipping for root project is false
-            shippingExtension.isShipping = false
+            shippingExtension.isPublished = false
 
             DownloadArtifactsTask downloadArtifactsTask = project.tasks.create("downloadArtifacts",
                     DownloadArtifactsTask)

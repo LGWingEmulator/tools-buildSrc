@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.buildsrc;
+package com.android.tools.internal.packaging;
 
 /**
- * Extension for the clone-artifact plugin that is applied to the root project.
+ * Basic extension for the distribution plugin
  */
-public class CloneArtifactsExtension {
-    String mainRepo
-    String secondaryRepo
+public class DistributionExtension {
+    String destinationPath
+    String dependenciesRepo
 }

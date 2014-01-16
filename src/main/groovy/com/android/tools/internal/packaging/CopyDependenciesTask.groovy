@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.buildsrc
+package com.android.tools.internal.packaging
+
+import com.android.tools.internal.BaseTask
 import com.google.common.io.Files
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration

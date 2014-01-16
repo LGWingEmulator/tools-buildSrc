@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.buildsrc
+package com.android.tools.internal.artifacts
+
+import com.android.tools.internal.BaseTask
 import com.google.common.base.Charsets
 import com.google.common.collect.Sets
 import com.google.common.hash.HashCode
@@ -68,7 +70,7 @@ class ArtifactDownloader {
                 // if the sub project doesn't ship then we put it's main dependencies in
                 // the secondary list.
                 buildArtifactList(resolutionResult.getRoot(),
-                        subProject.shipping.isShipping ? mainList : secondaryList)
+                        subProject.shipping.isPublished ? mainList : secondaryList)
             } catch (UnknownDomainObjectException ignored) {
                 // ignore
             }

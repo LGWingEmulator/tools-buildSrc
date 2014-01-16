@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.buildsrc;
+package com.android.tools.internal.artifacts;
 
 import com.google.common.io.Closeables;
 import org.gradle.api.artifacts.ModuleIdentifier;

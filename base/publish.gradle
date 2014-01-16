@@ -1,6 +1,10 @@
 apply plugin: 'maven'
 apply plugin: 'signing'
 
+jar {
+    from 'NOTICE'
+}
+
 task publishLocal(type: Upload) {
     configuration = configurations.archives
     repositories {

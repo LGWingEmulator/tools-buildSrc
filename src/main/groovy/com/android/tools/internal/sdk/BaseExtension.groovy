@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.buildsrc;
+package com.android.tools.internal.sdk;
 
 /**
- * Extension for the project to know if the project is shipping or not.
+ * Base extension for project publishing to the SDK Tools.
  */
-public class ShippingExtension {
-    boolean isShipping = true
+public class BaseExtension {
     List<String> launcherScripts
 }

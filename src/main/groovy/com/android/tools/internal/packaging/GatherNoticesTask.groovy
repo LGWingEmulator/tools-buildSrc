@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.buildsrc
+package com.android.tools.internal.packaging
+
+import com.android.tools.internal.BaseTask
 import com.google.common.base.Charsets
 import com.google.common.base.Joiner
 import com.google.common.collect.Lists
@@ -49,7 +51,7 @@ class GatherNoticesTask extends BaseTask {
         // gather the notice files into the output folder
         for (Project subProject : project.subprojects) {
 
-            if (!subProject.shipping.isShipping) {
+            if (!subProject.shipping.isPublished) {
                 continue
             }
 

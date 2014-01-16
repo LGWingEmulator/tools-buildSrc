@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.buildsrc
+package com.android.tools.internal.packaging
 
-import com.google.common.collect.Sets
+import com.android.tools.internal.sdk.javalib.GatherNoticesTask
+import com.android.tools.internal.sdk.javalib.CopyDependenciesTask
+import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Jar
 
-class DistributionPlugin implements org.gradle.api.Plugin<Project> {
+class DistributionPlugin implements Plugin<Project> {
 
     private Project project
 
@@ -93,59 +93,19 @@ class DistributionPlugin implements org.gradle.api.Plugin<Project> {
                 project.file(project.rootProject.distribution.destinationPath + "/tools/lib")
             }
 
-            copyDependenciesTask.onlyIf { project.shipping.isShipping }
+            copyDependenciesTask.onlyIf { project.shipping.isPublished }
 
             pushDistribution.dependsOn copyDependenciesTask
 
             // only push distribution of projects that are shipped.
             // When the task are created the project is not fully evaluated.
             project.afterEvaluate {
-                if (!project.shipping.isShipping) {
+                if (!project.shipping.isPublished) {
                     buildTask.enabled = false
                     copyDependenciesTask.enabled = false
                     copyTask.enabled = false
                 }
             }
-        }
-    }
-
-    private String getClassPath() {
-        StringBuilder sb = new StringBuilder()
-
-        Configuration configuration = project.configurations.runtime
-        getClassPathFromConfiguration(configuration, sb)
-
-        return sb.toString()
-    }
-
-    protected void getClassPathFromConfiguration(Configuration configuration, StringBuilder sb) {
-        // need to detect local files, so we first do a search by artifacts.
-        Set<String> processedFiles = Sets.newHashSet()
-
-        Set<ResolvedArtifact> artifacts = configuration.resolvedConfiguration.resolvedArtifacts
-        for (ResolvedArtifact artifact : artifacts) {
-            def group = artifact.moduleVersion.id.group
-            if (group.startsWith('com.android.tools') || group == 'base' || group == 'swt') {
-                // add the shorter name for the android dependencies
-                sb.append(' ').append(artifact.moduleVersion.id.name + ".jar")
-            } else {
-                // add the full name
-                sb.append(' ').append(artifact.file.name)
-            }
-            processedFiles << artifact.file.name
-        }
-
-        // for local file, go through the file list, and look at non processed files yet.
-        for (File file : configuration.files) {
-            String name = file.name
-            if (processedFiles.contains(name)) {
-                continue
-            }
-            String suffix = "-" + project.version + ".jar"
-            if (name.endsWith(suffix)) {
-                name = name.substring(0, name.size() - suffix.size()) + ".jar"
-            }
-            sb.append(' ').append(name)
         }
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.buildsrc
+package com.android.tools.internal
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.artifacts.ModuleVersionIdentifier
