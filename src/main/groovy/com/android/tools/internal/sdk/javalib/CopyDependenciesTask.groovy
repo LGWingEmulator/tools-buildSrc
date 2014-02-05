@@ -15,6 +15,7 @@
  */
 
 package com.android.tools.internal.sdk.javalib
+
 import com.android.tools.internal.BaseTask
 import com.google.common.io.Files
 import org.gradle.api.artifacts.Configuration

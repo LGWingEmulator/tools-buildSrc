@@ -16,26 +16,36 @@
 
 package com.android.tools.internal.sdk.javalib
 
-import com.android.tools.internal.sdk.BaseSdkPlugin
+import com.android.tools.internal.sdk.base.PlatformConfig
+import com.android.tools.internal.sdk.base.SdkFilesPlugin
 import com.google.common.collect.Sets
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.internal.reflect.Instantiator
 
-public class SdkJavaLibPlugin extends BaseSdkPlugin {
+import javax.inject.Inject
+
+public class SdkJavaLibPlugin extends SdkFilesPlugin {
+
+    private Jar buildTask
+    private CopyDependenciesTask copyDepTask
+
+    @Inject
+    public SdkJavaLibPlugin(Instantiator instantiator) {
+        super(instantiator)
+    }
 
     @Override
     void apply(Project project) {
         super.apply(project)
 
-        SdkComponentExtension extension = project.extensions.create("sdkPackaging", SdkComponentExtension)
-
         File sdkDir =  new File(project.buildDir, "sdk")
 
         // ----------
         // Task to build the jar files that goes in the tools folder
-        Jar buildTask = project.tasks.create("sdkJar", Jar)
+        buildTask = project.tasks.create("sdkJar", Jar)
         buildTask.from(project.sourceSets.main.output)
         buildTask.conventionMapping.destinationDir = {
             new File(sdkDir, "jar")
@@ -53,7 +63,7 @@ public class SdkJavaLibPlugin extends BaseSdkPlugin {
 
         // ----------
         // Task to gather the Jar dependencies
-        CopyDependenciesTask copyDepTask = project.tasks.create("copyDep", CopyDependenciesTask)
+        copyDepTask = project.tasks.create("copyDep", CopyDependenciesTask)
         copyDepTask.outputDir = new File(sdkDir, "deps")
 
         // Task to gather the NOTICE files.
@@ -63,22 +73,23 @@ public class SdkJavaLibPlugin extends BaseSdkPlugin {
 
         // ----------
 
-        // now do the copy files tasks.
-        CopySdkToolsFilesTask copyFiles = project.tasks.create("copyFiles", CopySdkToolsFilesTask)
-        copyFiles.conventionMapping.mainJar = { buildTask.archivePath }
-        copyFiles.conventionMapping.dependencyFolder = { copyDepTask.outputDir }
-        copyFiles.conventionMapping.noticeFolder = { gatherNoticesTask.outputDir }
-        copyFiles.conventionMapping.launcherScripts = {
-            if (extension.launcherScripts != null) {
-                return project.files(extension.launcherScripts).files
+    }
+
+    @Override
+    protected void createCopyTaskHook() {
+        super.createCopyTaskHook()
+
+        for (PlatformConfig platform : extension.getPlatforms()) {
+            platform.file(buildTask.getArchivePath()) {
+                into 'lib/'
+                builtBy buildTask
             }
-            return Collections.emptyList()
+
+            platform.file(copyDepTask.outputDir) {
+                into 'lib/'
+                builtBy copyDepTask
+            }
         }
-        copyFiles.conventionMapping.outputDir = { sdkRoot }
-
-        copyFiles.dependsOn buildTask, copyDepTask, gatherNoticesTask
-
-        copySdkToolsFiles.dependsOn copyFiles
     }
 
     private String getClassPath() {

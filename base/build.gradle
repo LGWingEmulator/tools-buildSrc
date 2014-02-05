@@ -14,8 +14,8 @@ buildDir = new File(ext.androidHostOut, "tools")
 
 ext.localRepo = project.hasProperty('localRepo') ? localRepo : "$ext.androidHostOut/repo"
 
-project.ext.baseVersion = '22.5.0'
-project.ext.buildVersion = '0.8.0'
+project.ext.baseVersion = '22.7.3'
+project.ext.buildVersion = '0.9.3'
 
 subprojects { Project project ->
     // Change buildDir first so that all plugins pick up the new value.
@@ -61,4 +61,18 @@ task prepareRepo(type: Copy) {
 task copyGradleProperty(type: Copy) {
     from { "${System.env.HOME}/.gradle/gradle.properties" }
     into { gradle.gradleUserHomeDir }
+}
+
+tasks.create(name: 'publishLocal')
+subprojects { project ->
+   if (project.tasks.findByName('publishLocal') != null) {
+       rootProject.publishLocal.dependsOn project.publishLocal
+   }
+}
+
+task setupGradleInIde << {
+   File dir = gradle.gradleHomeDir
+   String link = dir.path.substring(project.ext.androidHostOut.path.length() + 1)
+   String command = "ln -s $link ${new File(project.ext.androidHostOut, "gradle-dist-link").path}"
+   command.execute()
 }

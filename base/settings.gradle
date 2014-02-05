@@ -57,6 +57,7 @@ project(':builder'         ).projectDir = new File(rootDir, 'base/build-system/b
 project(':gradle-model'    ).projectDir = new File(rootDir, 'base/build-system/gradle-model')
 project(':gradle'          ).projectDir = new File(rootDir, 'base/build-system/gradle')
 
+include ':base:templates'
 
 include ':swt:chimpchat'
 include ':swt:ddms:app'
@@ -70,4 +71,7 @@ include ':swt:sdkmanager:sdkuilib'
 include ':swt:swtmenubar'
 include ':swt:traceview'
 include ':swt:uiautomatorviewer'
+
+include ':sdk'
+project(':sdk').projectDir = new File(rootDir.getParentFile(), "sdk")
 
