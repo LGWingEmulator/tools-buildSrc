@@ -23,10 +23,9 @@ import javax.inject.Inject
 
 /**
  */
-class SdkFilesPlugin implements Plugin<Project> {
+class SdkFilesPlugin extends BaseSdkPlugin implements Plugin<Project> {
 
     private final Instantiator instantiator
-    protected Project project
 
     BaseExtension extension
 
@@ -37,7 +36,7 @@ class SdkFilesPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        this.project = project
+        super.apply(project)
 
         extension = project.extensions.create('sdk', BaseExtension, instantiator, project.fileResolver)
 
@@ -62,13 +61,9 @@ class SdkFilesPlugin implements Plugin<Project> {
                     "copy${platform.name.capitalize()}SdkToolsFiles", CopyToolItemsTask)
 
             copySdkToolsFiles.items = platform.getItems()
-            copySdkToolsFiles.outputDir = new File(project.rootProject.buildDir, platform.name + File.separatorChar + "tools")
+            copySdkToolsFiles.outputDir = new File(getSdkRoot(), platform.name + File.separatorChar + "tools")
 
             copySdkToolsFiles.dependsOn platform.builtBy
         }
-    }
-
-    protected File getSdkRoot() {
-        return new File(project.rootProject.buildDir, "tools")
     }
 }

@@ -23,9 +23,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.bundling.Zip
 
-public class SdkToolsPlugin implements Plugin<Project> {
-
-    Project project
+public class SdkToolsPlugin extends BaseSdkPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
@@ -33,7 +31,7 @@ public class SdkToolsPlugin implements Plugin<Project> {
             throw new RuntimeException("sdk-tools plugin must be applied to root project only")
         }
 
-        this.project = project
+        super.apply(project)
 
         Task makeTask = project.tasks.create("makeSdk")
 
@@ -53,7 +51,7 @@ public class SdkToolsPlugin implements Plugin<Project> {
     }
 
     private Task setupPlatform(String platformName) {
-        File root = new File(project.buildDir, platformName);
+        File root = new File(getSdkRoot(), platformName);
 
         File sdkRoot = new File(root, "tools")
 
