@@ -14,8 +14,7 @@ buildDir = new File(ext.androidHostOut, "tools")
 
 ext.localRepo = project.hasProperty('localRepo') ? localRepo : "$ext.androidHostOut/repo"
 
-project.ext.baseVersion = '22.7.3'
-project.ext.buildVersion = '0.9.3'
+apply from: "$rootDir/buildSrc/base/version.gradle"
 
 subprojects { Project project ->
     // Change buildDir first so that all plugins pick up the new value.
