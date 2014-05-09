@@ -68,7 +68,7 @@ public class SdkToolsPlugin extends BaseSdkPlugin implements Plugin<Project> {
 
         Zip zipFiles = project.tasks.create("zip${platformName.capitalize()}Sdk", Zip)
         zipFiles.from(sdkRoot)
-        zipFiles.destinationDir = root
+        zipFiles.destinationDir = project.ext.androidHostDist
         zipFiles.setArchiveName("$platformName-tools.zip")
         zipFiles.mustRunAfter copyFiles
 
