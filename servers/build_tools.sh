@@ -36,5 +36,6 @@ if [[ -z "$BNUM"     ]]; then die "## Error: Missing build number"; fi
 cd "$PROG_DIR"
 
 set -x
-../../gradlew -b ../../build.gradle --parallel-threads="${NUM_THREADS:-47}" makeSdk
+
+OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ../../gradlew -b ../../build.gradle --parallel-threads="${NUM_THREADS:-47}" makeSdk
 
