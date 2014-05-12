@@ -23,11 +23,13 @@ import org.gradle.api.artifacts.ResolvedArtifact
 abstract class BaseTask extends DefaultTask {
 
     public static boolean isLocalArtifact(ModuleVersionIdentifier id) {
-        return id.group == "base" || id.group == "swt"
+        return id.group.startsWith("tools")
     }
 
     public static boolean isAndroidArtifact(ModuleVersionIdentifier id) {
-        return id.group.startsWith("com.android.tools") && !id.group.startsWith("com.android.tools.external")
+        return (id.group.startsWith("com.android.tools") &&
+                !id.group.startsWith("com.android.tools.external")) ||
+                id.group.startsWith("com.android.external")
     }
 
     public static boolean isValidArtifactType(ResolvedArtifact artifact) {

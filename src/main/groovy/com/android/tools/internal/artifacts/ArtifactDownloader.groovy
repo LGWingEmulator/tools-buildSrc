@@ -70,7 +70,7 @@ class ArtifactDownloader {
                 // if the sub project doesn't ship then we put it's main dependencies in
                 // the secondary list.
                 buildArtifactList(resolutionResult.getRoot(),
-                        subProject.shipping.isPublished ? mainList : secondaryList)
+                        subProject.publishing.isPublished ? mainList : secondaryList)
             } catch (UnknownDomainObjectException ignored) {
                 // ignore
             }

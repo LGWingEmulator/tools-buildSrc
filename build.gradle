@@ -3,15 +3,18 @@ apply plugin: 'idea'
 apply plugin: 'maven'
 
 repositories {
-    mavenCentral()
+    maven { url = "$rootDir/../../prebuilts/tools/common/m2/repository" }
+    maven { url = "$rootDir/../../prebuilts/tools/common/m2/internal" }
 }
+
+buildDir = "../../build/buildSrc"
 
 dependencies {
     compile gradleApi()
     groovy localGroovy()
 
-    compile "org.apache.commons:commons-io:1.3.2"
-    compile "com.google.guava:guava:14.0"
+    compile "commons-io:commons-io:1.3.2"
+    compile "com.google.guava:guava:15.0"
 
     testCompile "junit:junit:3.8.1"
 }
