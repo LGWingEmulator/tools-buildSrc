@@ -53,6 +53,11 @@ public class BaseExtension {
         action.execute(winConfig)
     }
 
+    void common(PlatformConfig config1, PlatformConfig config2, Action<PlatformConfig> action) {
+        action.execute(config1)
+        action.execute(config2)
+    }
+
     PlatformConfig getLinux() {
         return linuxConfig
     }
