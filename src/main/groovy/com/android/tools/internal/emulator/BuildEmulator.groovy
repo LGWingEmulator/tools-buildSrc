@@ -22,7 +22,6 @@ import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.tooling.BuildException
-
 /**
  * Custom task to build emulator.
  */
@@ -49,8 +48,8 @@ class BuildEmulator extends DefaultTask {
                 "$project.projectDir/android-rebuild.sh --mingw --out-dir=$output" :
                 "$project.projectDir/android-rebuild.sh --out-dir=$output"
 
-        ByteArrayOutputStream stdout = new ByteArrayOutputStream()
-        ByteArrayOutputStream stderr = new ByteArrayOutputStream()
+        StringBuilder stdout = new StringBuilder()
+        StringBuilder stderr = new StringBuilder()
 
         Process p = command.execute()
         p.consumeProcessOutput(stdout, stderr)
