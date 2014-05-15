@@ -15,9 +15,10 @@
  */
 
 package com.android.tools.internal.sdk.base
-import com.google.common.collect.Lists
+
 import com.google.common.io.Files
 import org.gradle.api.DefaultTask
+import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 /**
  */
@@ -27,42 +28,31 @@ class CopyToolItemsTask extends DefaultTask {
 
     File outputDir
 
-    List<File> getInputFiles() {
-        if (items == null) {
-            return Collections.emptyList()
-        }
-
-        List<File> files = Lists.newArrayListWithExpectedSize(items.size())
-        for (ToolItem item : items) {
-            files.add(item.getFile())
-        }
-
-        return files;
-    }
-
     @TaskAction
     void copy() {
         File outDir = getOutputDir()
 
+        Project p = getProject()
+
         if (items != null) {
             for (ToolItem item : items) {
-                File fromFile = item.getFile()
+                File sourceFile = item.getSourceFile(p)
 
                 File toFolder = outDir
-                if (item.getPath() != null) {
-                    toFolder = new File(outDir, item.getPath())//.replace('/', File.separatorChar))
+                if (item.getDestinationPath() != null) {
+                    toFolder = new File(outDir, item.getDestinationPath())//.replace('/', File.separatorChar))
                     toFolder.mkdirs()
                 }
 
-                if (fromFile.isFile()) {
-                    File toFile = copyFile(fromFile, toFolder, item)
+                if (sourceFile.isFile()) {
+                    File toFile = copyFile(sourceFile, toFolder, item)
                     if (item.getExecutable()) {
                         toFile.setExecutable(true)
                     }
-                } else if (fromFile.isDirectory()) {
-                    copyFolderItems(fromFile, toFolder, item.getFlatten())
+                } else if (sourceFile.isDirectory()) {
+                    copyFolderItems(sourceFile, toFolder, item.getFlatten())
                 } else {
-                    throw new RuntimeException("Missing sdk-files: ${fromFile}")
+                    throw new RuntimeException("Missing sdk-files: ${sourceFile}")
                 }
             }
         }
@@ -71,7 +61,7 @@ class CopyToolItemsTask extends DefaultTask {
     protected File copyFile(File fromFile, File toFolder, ToolItem item) {
         File toFile = new File(toFolder, (item != null && item.getName() != null) ? item.getName() : fromFile.name)
 
-        String fromPath = item != null ? item.getFromPath() : null
+        String fromPath = item != null ? item.getSourcePath() : null
         if (fromPath != null) {
             logger.info("$fromPath -> $toFile")
         } else {

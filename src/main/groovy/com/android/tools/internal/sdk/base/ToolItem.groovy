@@ -15,39 +15,35 @@
  */
 
 package com.android.tools.internal.sdk.base
+
 import com.google.common.collect.Lists
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Optional
+import org.gradle.api.Project
 
 /**
- * A file going in the tools folder of the SDK.
- * Contains the original file (or relative path from the project), an optional
- * subfolder where to put it, whether it's an executable (to reset its +x flag),
- * and what is required to build it.
+ * A file or folder going in the tools folder of the SDK.
+ * Contains an object representing the file/folder to copy. This will resolved later.
+ * Also contains destination information and other properties
  */
 class ToolItem {
 
-    private final File file
-    private final String fromPath
+    /** From information: can be a closure returning a string/file, or a string/file directly */
+    private final Object fromPath
+
     private List<Object> builtByTasks
 
-    private String path
+    private String destinationPath
     private String name
     private boolean flatten = false
     private boolean executable = false
 
-    ToolItem(File file, String fromPath) {
-        this.file = file
+    private String sourcePath
+
+    ToolItem(Object fromPath) {
         this.fromPath = fromPath
     }
 
-    ToolItem(File file) {
-        this(file, null)
-    }
-
-    void into(String path) {
-        this.path = path
+    void into(String destinationPath) {
+        this.destinationPath = destinationPath
     }
 
     void name(String name) {
@@ -70,27 +66,51 @@ class ToolItem {
         Collections.addAll(builtByTasks, tasks)
     }
 
-    @InputFile
-    File getFile() {
-        return file
+    File getSourceFile(Project project) {
+        Object from = fromPath
+
+        File sourceFile = null
+
+        if (from instanceof Closure) {
+            from = ((Closure) from).call()
+        }
+
+        if (from instanceof GString) {
+            from = from.toString()
+        }
+
+        if (from instanceof File) {
+            sourceFile = (File) from
+            sourcePath = sourceFile.path
+
+        } else if (from instanceof String) {
+            sourcePath = (String) from
+            sourceFile = project.file(sourcePath)
+        }
+
+        if (sourceFile == null) {
+            throw new RuntimeException("Unable to find source file for path '${sourcePath}' from ${this}")
+        }
+
+        return sourceFile
     }
 
-    @Input @Optional
-    String getPath() {
-        return path
+    String getSourcePath() {
+        return sourcePath
     }
 
-    @Input @Optional
+    String getDestinationPath() {
+        return destinationPath
+    }
+
     String getName() {
         return name
     }
 
-    @Input @Optional
     boolean getFlatten() {
         return flatten
     }
 
-    @Input @Optional
     boolean getExecutable() {
         return executable
     }
@@ -102,7 +122,15 @@ class ToolItem {
         return builtByTasks
     }
 
-    String getFromPath() {
-        return fromPath
+    @Override
+    public String toString() {
+        return "ToolItem{" +
+                "fromPath=" + fromPath +
+                ", builtByTasks=" + builtByTasks +
+                ", destinationPath='" + destinationPath + '\'' +
+                ", name='" + name + '\'' +
+                ", flatten=" + flatten +
+                ", executable=" + executable +
+                '}';
     }
 }

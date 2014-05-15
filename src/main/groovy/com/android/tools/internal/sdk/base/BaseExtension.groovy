@@ -15,11 +15,8 @@
  */
 
 package com.android.tools.internal.sdk.base
-
 import org.gradle.api.Action
-import org.gradle.api.internal.file.FileResolver
-import org.gradle.internal.reflect.Instantiator;
-
+import org.gradle.internal.reflect.Instantiator
 /**
  * Base extension for project publishing to the SDK Tools.
  */
@@ -29,10 +26,10 @@ public class BaseExtension {
     private PlatformConfig macConfig
     private PlatformConfig winConfig
 
-    public BaseExtension(Instantiator instantiator, FileResolver fileResolver) {
-        linuxConfig = instantiator.newInstance(PlatformConfig.class, "linux", fileResolver)
-        macConfig = instantiator.newInstance(PlatformConfig.class, "mac", fileResolver)
-        winConfig = instantiator.newInstance(PlatformConfig.class, "win", fileResolver)
+    public BaseExtension(Instantiator instantiator) {
+        linuxConfig = instantiator.newInstance(PlatformConfig.class, "linux")
+        macConfig = instantiator.newInstance(PlatformConfig.class, "mac")
+        winConfig = instantiator.newInstance(PlatformConfig.class, "win")
     }
 
     void linux(Action<PlatformConfig> action) {

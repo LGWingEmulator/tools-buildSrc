@@ -1,0 +1,19 @@
+subprojects { Project project ->
+    // only configure leaf projects.
+    if (!project.getSubprojects().isEmpty()) return
+
+    apply plugin: 'java'
+    apply plugin: 'clone-artifacts'
+
+    repositories {
+        maven { url = uri(rootProject.cloneArtifacts.mainRepo) }
+        maven { url = uri(rootProject.cloneArtifacts.secondaryRepo) }
+    }
+
+    test {
+        // todo: disable this for CI since we'll use the CI UI to do the report.
+        reports.html.enabled = true
+    }
+
+    apply from: "$rootDir/buildSrc/base/base.gradle"
+}

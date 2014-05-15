@@ -15,10 +15,8 @@
  */
 
 package com.android.tools.internal.sdk.base
-
 import com.google.common.collect.Lists
 import org.gradle.api.Action
-import org.gradle.api.internal.file.FileResolver
 
 /**
  * A Config to build the SDK tools for a given platform.
@@ -28,42 +26,27 @@ import org.gradle.api.internal.file.FileResolver
 class PlatformConfig {
 
     private final String name
-    private final FileResolver fileResolver
     private final List<ToolItem> items = Lists.newArrayList()
 
-    PlatformConfig(String name, FileResolver fileResolver) {
+    PlatformConfig(String name) {
         this.name = name
-        this.fileResolver = fileResolver
     }
 
     String getName() {
         return name
     }
 
-    void path(String path) {
-        getToolItem(path)
+    void item(Object fromPath) {
+        getToolItem(fromPath)
     }
 
-    void file(File file) {
-        getToolItem(file, null)
-    }
-
-    void path(String path, Action<ToolItem> config) {
-        ToolItem item = getToolItem(path)
+    void item(Object fromPath, Action<ToolItem> config) {
+        ToolItem item = getToolItem(fromPath)
         config.execute(item)
     }
 
-    void file(File file, Action<ToolItem> config) {
-        ToolItem item = getToolItem(file, null)
-        config.execute(item)
-    }
-
-    private getToolItem(String path) {
-        return getToolItem(fileResolver.resolve(path), path)
-    }
-
-    private getToolItem(File file, String path) {
-        ToolItem item = new ToolItem(file, path)
+    private getToolItem(Object fromPath) {
+        ToolItem item = new ToolItem(fromPath)
         items.add(item)
         return item
     }

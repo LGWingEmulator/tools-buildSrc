@@ -80,12 +80,12 @@ public class SdkJavaLibPlugin extends SdkFilesPlugin {
         super.createCopyTaskHook()
 
         for (PlatformConfig platform : extension.getPlatforms()) {
-            platform.file(buildTask.getArchivePath()) {
+            platform.item(buildTask.getArchivePath()) {
                 into 'lib/'
                 builtBy buildTask
             }
 
-            platform.file(copyDepTask.outputDir) {
+            platform.item(copyDepTask.outputDir) {
                 into 'lib/'
                 builtBy copyDepTask
             }

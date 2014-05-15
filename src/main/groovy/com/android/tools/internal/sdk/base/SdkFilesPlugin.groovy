@@ -38,7 +38,7 @@ class SdkFilesPlugin extends BaseSdkPlugin implements Plugin<Project> {
     void apply(Project project) {
         super.apply(project)
 
-        extension = project.extensions.create('sdk', BaseExtension, instantiator, project.fileResolver)
+        extension = project.extensions.create('sdk', BaseExtension, instantiator)
 
         project.afterEvaluate {
             createCopyTask()
@@ -57,10 +57,11 @@ class SdkFilesPlugin extends BaseSdkPlugin implements Plugin<Project> {
         createCopyTaskHook()
 
         for (PlatformConfig platform : extension.getPlatforms()) {
+
             CopyToolItemsTask copySdkToolsFiles = project.tasks.create(
                     "copy${platform.name.capitalize()}SdkToolsFiles", CopyToolItemsTask)
 
-            copySdkToolsFiles.items = platform.getItems()
+            copySdkToolsFiles.items = platform.items
             copySdkToolsFiles.outputDir = new File(getSdkRoot(), platform.name + File.separatorChar + "tools")
 
             copySdkToolsFiles.dependsOn platform.builtBy
