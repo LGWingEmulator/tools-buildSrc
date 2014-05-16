@@ -1,17 +1,7 @@
-apply plugin: 'maven'
 apply plugin: 'signing'
 
 jar {
     from 'NOTICE'
-}
-
-task publishLocal(type: Upload) {
-    configuration = configurations.archives
-    repositories {
-        mavenDeployer {
-            repository(url: uri("$rootProject.ext.localRepo"))
-        }
-    }
 }
 
 project.ext.sonatypeUsername = hasProperty('sonatypeUsername') ? sonatypeUsername : ""
