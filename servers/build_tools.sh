@@ -37,5 +37,7 @@ cd "$PROG_DIR"
 
 set -x
 
-OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ../../gradlew -b ../../build.gradle --parallel-threads="${NUM_THREADS:-47}" --no-daemon makeSdk
+# temp disable --parallel builds
+#OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ../../gradlew -b ../../build.gradle --parallel-threads="${NUM_THREADS:-47}" --no-daemon makeSdk
+OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ../../gradlew -b ../../build.gradle --no-daemon makeSdk
 
