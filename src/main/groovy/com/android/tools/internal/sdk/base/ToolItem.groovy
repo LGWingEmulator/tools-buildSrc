@@ -27,9 +27,12 @@ import org.gradle.api.Project
 class ToolItem {
 
     /** From information: can be a closure returning a string/file, or a string/file directly */
-    private final Object fromPath
+    private final Object itemPath
 
     private List<Object> builtByTasks
+
+    /** notice can be a string or a file */
+    private Object notice = 'NOTICE'
 
     private String destinationPath
     private String name
@@ -38,8 +41,8 @@ class ToolItem {
 
     private String sourcePath
 
-    ToolItem(Object fromPath) {
-        this.fromPath = fromPath
+    ToolItem(Object itemPath) {
+        this.itemPath = itemPath
     }
 
     void into(String destinationPath) {
@@ -48,6 +51,10 @@ class ToolItem {
 
     void name(String name) {
         this.name = name
+    }
+
+    void notice(Object notice) {
+        this.notice = notice
     }
 
     void executable(boolean b) {
@@ -67,7 +74,7 @@ class ToolItem {
     }
 
     File getSourceFile(Project project) {
-        Object from = fromPath
+        Object from = itemPath
 
         File sourceFile = null
 
@@ -107,6 +114,10 @@ class ToolItem {
         return name
     }
 
+    Object getNotice() {
+        return notice
+    }
+
     boolean getFlatten() {
         return flatten
     }
@@ -125,7 +136,7 @@ class ToolItem {
     @Override
     public String toString() {
         return "ToolItem{" +
-                "fromPath=" + fromPath +
+                "itemPath=" + itemPath +
                 ", builtByTasks=" + builtByTasks +
                 ", destinationPath='" + destinationPath + '\'' +
                 ", name='" + name + '\'' +

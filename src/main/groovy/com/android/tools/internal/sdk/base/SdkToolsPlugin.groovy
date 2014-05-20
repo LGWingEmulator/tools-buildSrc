@@ -23,6 +23,10 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.bundling.Zip
 
+/**
+ * Plugin for the root project. This orchestrates the output of all the modules
+ * into the SDK Tools package
+ */
 public class SdkToolsPlugin extends BaseSdkPlugin implements Plugin<Project> {
 
     @Override
@@ -63,7 +67,12 @@ public class SdkToolsPlugin extends BaseSdkPlugin implements Plugin<Project> {
             sdkRoot.mkdirs()
         }
 
-        Task copyFiles = project.tasks.create("copy${platformName.capitalize()}Sdk")
+        final String copyTaskName = "copy${platformName.capitalize()}SdkToolsFiles"
+        String[] noticeTaskNames = [copyTaskName, "copyDependencies" ]
+
+        Task copyFiles = project.tasks.create("copy${platformName.capitalize()}Sdk", MergeNoticesTask)
+        copyFiles.noticeFile = new File(sdkRoot, "NOTICE.txt")
+        copyFiles.noticeTaskNames = noticeTaskNames
         copyFiles.mustRunAfter cleanFolder
 
         Zip zipFiles = project.tasks.create("zip${platformName.capitalize()}Sdk", Zip)
@@ -76,14 +85,12 @@ public class SdkToolsPlugin extends BaseSdkPlugin implements Plugin<Project> {
         makeTask.group = "Android SDK"
         makeTask.dependsOn cleanFolder, copyFiles, zipFiles
 
-        final String nameCheck = "copy${platformName.capitalize()}SdkToolsFiles"
-
         project.afterEvaluate {
             List<Task> copyTasks = Lists.newArrayList()
 
             project.subprojects.each { p ->
                 NamedDomainObjectSet<Task> matches = p.tasks.matching { t ->
-                    nameCheck.equals(t.name)
+                    copyTaskName.equals(t.name)
                 }
                 copyTasks.addAll(matches)
             }

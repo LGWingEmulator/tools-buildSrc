@@ -44,7 +44,8 @@ public class SdkJavaLibPlugin extends SdkFilesPlugin {
         File sdkDir =  new File(project.buildDir, "sdk")
 
         // ----------
-        // Task to build the jar files that goes in the tools folder
+        // Task to build the jar files that goes in the tools folder.
+        // This is called through the ToolItem.builtBy
         buildTask = project.tasks.create("sdkJar", Jar)
         buildTask.from(project.sourceSets.main.output)
         buildTask.conventionMapping.destinationDir = {
@@ -63,13 +64,11 @@ public class SdkJavaLibPlugin extends SdkFilesPlugin {
 
         // ----------
         // Task to gather the Jar dependencies
-        copyDepTask = project.tasks.create("copyDep", CopyDependenciesTask)
+        // This is called through the ToolItem.builtBy
+        copyDepTask = project.tasks.create("copyDependencies", CopyDependenciesTask)
         copyDepTask.outputDir = new File(sdkDir, "deps")
-
-        // Task to gather the NOTICE files.
-        GatherNoticesTask gatherNoticesTask = project.tasks.create("gatherNotices", GatherNoticesTask)
-        gatherNoticesTask.outputDir = new File(sdkDir, "notices")
-        gatherNoticesTask.conventionMapping.repoDir = { new File(project.rootProject.cloneArtifacts.mainRepo) }
+        copyDepTask.noticeDir = new File(sdkDir, "deps_notices")
+        copyDepTask.repoDir = new File(project.rootProject.cloneArtifacts.mainRepo)
 
         // ----------
 
@@ -88,6 +87,7 @@ public class SdkJavaLibPlugin extends SdkFilesPlugin {
             platform.item(copyDepTask.outputDir) {
                 into 'lib/'
                 builtBy copyDepTask
+                notice null
             }
         }
     }

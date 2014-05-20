@@ -62,7 +62,8 @@ class SdkFilesPlugin extends BaseSdkPlugin implements Plugin<Project> {
                     "copy${platform.name.capitalize()}SdkToolsFiles", CopyToolItemsTask)
 
             copySdkToolsFiles.items = platform.items
-            copySdkToolsFiles.outputDir = new File(getSdkRoot(), platform.name + File.separatorChar + "tools")
+            copySdkToolsFiles.itemOutputDir = new File(getSdkRoot(), platform.name + File.separatorChar + "tools")
+            copySdkToolsFiles.noticeDir = new File(project.buildDir, "sdk/notices")
 
             copySdkToolsFiles.dependsOn platform.builtBy
         }

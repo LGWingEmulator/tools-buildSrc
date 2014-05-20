@@ -17,9 +17,15 @@
 package com.android.tools.internal.sdk.javalib
 
 import com.android.tools.internal.BaseTask
+import com.google.common.base.Charsets
+import com.google.common.base.Joiner
+import com.google.common.collect.Lists
 import com.google.common.io.Files
+import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
@@ -34,11 +40,21 @@ class CopyDependenciesTask extends BaseTask {
         return project.configurations.compile.files
     }
 
+    @OutputDirectory
+    File noticeDir
+
+    @InputDirectory
+    File repoDir
+
     @TaskAction
     public void copyDependencies() {
-        File outDir = getOutputDir()
-        outDir.deleteDir()
-        outDir.mkdirs()
+        File depOutDir = getOutputDir()
+        depOutDir.deleteDir()
+        depOutDir.mkdirs()
+
+        File noticeOutDir = getNoticeDir()
+        noticeOutDir.deleteDir()
+        noticeOutDir.mkdirs()
 
         Configuration configuration = project.configurations.compile
         Set<ResolvedArtifact> artifacts = configuration.resolvedConfiguration.resolvedArtifacts
@@ -47,20 +63,60 @@ class CopyDependenciesTask extends BaseTask {
         for (ResolvedArtifact artifact : artifacts) {
             sb.setLength(0)
             sb.append("${artifact.moduleVersion.id.toString()} > ")
-            // check it's not an android artifact or a local artifact
-            if (isAndroidArtifact(artifact.moduleVersion.id)) {
-                sb.append("SKIPPED (android)")
-            } else if (isLocalArtifact(artifact.moduleVersion.id)) {
-                sb.append("SKIPPED (local)")
-            } else if (!isValidArtifactType(artifact)) {
-                sb.append("SKIPPED (type = ${artifact.type})")
-            } else {
-                File dest = new File(outDir, artifact.file.name)
-                sb.append("${dest.absolutePath}")
-                Files.copy(artifact.file, dest)
+
+            try {
+                // check it's not an android artifact or a local artifact
+                if (isAndroidArtifact(artifact.moduleVersion.id)) {
+                    sb.append("SKIPPED (android)")
+                } else if (isLocalArtifact(artifact.moduleVersion.id)) {
+                    sb.append("SKIPPED (local)")
+                } else if (!isValidArtifactType(artifact)) {
+                    sb.append("SKIPPED (type = ${artifact.type})")
+                } else {
+
+                    // copy the artifact
+                    File dest = new File(depOutDir, artifact.file.name)
+                    sb.append(dest.absolutePath)
+                    Files.copy(artifact.file, dest)
+
+                    // copy the license file
+                    ModuleVersionIdentifier id = artifact.moduleVersion.id
+
+                    File fromFile = new File(repoDir,
+                            id.group.replace('.', '/') +
+                                    '/' + id.name + '/' + id.version + '/NOTICE')
+                    if (!fromFile.isFile()) {
+                        sb.append("Error: Missing NOTICE file")
+                        throw new GradleException(
+                                "Missing NOTICE file: " + fromFile.absolutePath)
+                    }
+
+                    File toFile = new File(noticeOutDir, "NOTICE_" + artifact.file.name + ".txt")
+
+                    sb.append(" (${toFile.absolutePath})")
+
+                    copyNoticeAndAddHeader(fromFile, toFile, artifact.file.name)
+
+                }
+            } finally {
+
             }
 
             logger.info(sb.toString())
         }
+    }
+
+    private static void copyNoticeAndAddHeader(File from, File to, String name) {
+        List<String> lines = Files.readLines(from, Charsets.UTF_8)
+        List<String> noticeLines = Lists.newArrayListWithCapacity(lines.size() + 4)
+        noticeLines.addAll([
+                "============================================================",
+                "Notices for file(s):",
+                name,
+                "------------------------------------------------------------"
+        ]);
+        noticeLines.addAll(lines);
+
+        Files.write(Joiner.on("\n").join(noticeLines.iterator()), to, Charsets.UTF_8)
     }
 }
