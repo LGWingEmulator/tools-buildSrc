@@ -55,10 +55,7 @@ class CloneArtifactsPlugin implements Plugin<Project> {
             DownloadArtifactsTask downloadArtifactsTask = project.tasks.create("downloadArtifacts",
                     DownloadArtifactsTask)
             downloadArtifactsTask.project = project
-            downloadArtifactsTask.conventionMapping.mainRepo =  { project.file(extension.mainRepo) }
-            downloadArtifactsTask.conventionMapping.secondaryRepo =  {
-                project.file(extension.secondaryRepo)
-            }
+            downloadArtifactsTask.conventionMapping.repository =  { project.file(extension.repository) }
 
             downloadArtifactsTask.dependsOn setupTask
             cloneArtifacts.dependsOn downloadArtifactsTask

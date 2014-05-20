@@ -15,20 +15,17 @@
  */
 
 package com.android.tools.internal.artifacts
-
 import com.android.tools.internal.BaseTask
-import com.android.tools.internal.artifacts.ArtifactDownloader
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 
 class DownloadArtifactsTask extends BaseTask {
 
     Project project
-    File mainRepo
-    File secondaryRepo
+    File repository
 
     @TaskAction
     public void downloadArtifacts() {
-        new ArtifactDownloader(getProject(), getMainRepo(), getSecondaryRepo()).downloadArtifacts()
+        new ArtifactDownloader(getProject(), getRepository()).downloadArtifacts()
     }
 }

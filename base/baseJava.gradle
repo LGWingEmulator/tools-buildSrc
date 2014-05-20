@@ -3,8 +3,7 @@ apply plugin: 'clone-artifacts'
 apply plugin: 'maven'
 
 repositories {
-    maven { url = uri(rootProject.cloneArtifacts.mainRepo) }
-    maven { url = uri(rootProject.cloneArtifacts.secondaryRepo) }
+    maven { url = uri(rootProject.cloneArtifacts.repository) }
 }
 
 test {

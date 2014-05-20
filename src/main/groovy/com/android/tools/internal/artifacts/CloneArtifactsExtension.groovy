@@ -20,6 +20,5 @@ package com.android.tools.internal.artifacts;
  * Extension for the clone-artifact plugin that is applied to the root project.
  */
 public class CloneArtifactsExtension {
-    String mainRepo
-    String secondaryRepo
+    String repository
 }

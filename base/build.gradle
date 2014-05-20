@@ -2,8 +2,7 @@ apply plugin: 'clone-artifacts'
 
 // artifact cloning destinations
 cloneArtifacts {
-    mainRepo = "$rootDir/../prebuilts/tools/common/m2/repository"
-    secondaryRepo = "$rootDir/../prebuilts/tools/common/m2/internal"
+    repository = "$rootDir/../prebuilts/tools/common/m2/repository"
 }
 
 /*

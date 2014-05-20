@@ -95,7 +95,7 @@ class CopyDependenciesTask extends BaseTask {
 
                     sb.append(" (${toFile.absolutePath})")
 
-                    copyNoticeAndAddHeader(fromFile, toFile, artifact.file.name)
+                    copyNoticeAndAddHeader(fromFile, toFile, "lib/${artifact.file.name}")
 
                 }
             } finally {

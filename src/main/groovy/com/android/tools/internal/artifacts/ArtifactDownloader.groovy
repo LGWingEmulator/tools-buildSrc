@@ -46,20 +46,16 @@ class ArtifactDownloader {
 
     Project project
 
-    File mainRepo
-    File secondaryRepo
+    File repository
 
-    ArtifactDownloader(Project project, File mainRepo, File secondaryRepo) {
+    ArtifactDownloader(Project project, File repository) {
         this.project = project
-        this.mainRepo = mainRepo
-        this.secondaryRepo = secondaryRepo
+        this.repository = repository
     }
 
     public void downloadArtifacts() {
 
-        Set<ModuleVersionIdentifier> mainList = Sets.newHashSet()
-        Set<ModuleVersionIdentifier> secondaryList = Sets.newHashSet()
-        Set<ModuleVersionIdentifier> gradleRepoList = Sets.newHashSet()
+        Set<ModuleVersionIdentifier> artifactList = Sets.newHashSet()
 
         // gather the main and secondary dependencies for all the sub-projects.
         for (Project subProject : project.allprojects) {
@@ -69,8 +65,7 @@ class ArtifactDownloader {
                         .getIncoming().getResolutionResult()
                 // if the sub project doesn't ship then we put it's main dependencies in
                 // the secondary list.
-                buildArtifactList(resolutionResult.getRoot(),
-                        subProject.publishing.isPublished ? mainList : secondaryList)
+                buildArtifactList(resolutionResult.getRoot(), artifactList)
             } catch (UnknownDomainObjectException ignored) {
                 // ignore
             }
@@ -78,7 +73,7 @@ class ArtifactDownloader {
             try {
                 resolutionResult = subProject.configurations.getByName("testCompile")
                         .getIncoming().getResolutionResult()
-                buildArtifactList(resolutionResult.getRoot(), secondaryList)
+                buildArtifactList(resolutionResult.getRoot(), artifactList)
             } catch (UnknownDomainObjectException ignored) {
                 // ignore
             }
@@ -86,7 +81,7 @@ class ArtifactDownloader {
             try {
                 resolutionResult = subProject.configurations.getByName("testRuntime")
                         .getIncoming().getResolutionResult()
-                buildArtifactList(resolutionResult.getRoot(), secondaryList)
+                buildArtifactList(resolutionResult.getRoot(), artifactList)
             } catch (UnknownDomainObjectException ignored) {
                 // ignore
             }
@@ -97,7 +92,7 @@ class ArtifactDownloader {
             try {
                 resolutionResult = subProject.configurations.getByName("provided")
                         .getIncoming().getResolutionResult()
-                buildArtifactList(resolutionResult.getRoot(), secondaryList)
+                buildArtifactList(resolutionResult.getRoot(), artifactList)
             } catch (UnknownDomainObjectException ignored) {
                 // ignore
             }
@@ -107,7 +102,7 @@ class ArtifactDownloader {
             try {
                 resolutionResult = subProject.configurations.getByName("hidden")
                         .getIncoming().getResolutionResult()
-                buildArtifactList(resolutionResult.getRoot(), secondaryList)
+                buildArtifactList(resolutionResult.getRoot(), artifactList)
             } catch (UnknownDomainObjectException ignored) {
                 // ignore
             }
@@ -116,7 +111,7 @@ class ArtifactDownloader {
             try {
                 resolutionResult = subProject.configurations.getByName("gradleRepo")
                         .getIncoming().getResolutionResult()
-                buildArtifactList(resolutionResult.getRoot(), gradleRepoList)
+                buildArtifactList(resolutionResult.getRoot(), artifactList)
             } catch (UnknownDomainObjectException ignored) {
                 // ignore
             }
@@ -127,16 +122,8 @@ class ArtifactDownloader {
 
         try {
             Set<ModuleVersionIdentifier> downloadedSet = Sets.newHashSet()
-            for (ModuleVersionIdentifier id : mainList) {
-                pullArtifact(repoUrls, id, mainRepo, downloadedSet)
-            }
-
-            for (ModuleVersionIdentifier id : secondaryList) {
-                pullArtifact(repoUrls, id, secondaryRepo, downloadedSet)
-            }
-
-            for (ModuleVersionIdentifier id : gradleRepoList) {
-                pullArtifact(repoUrls, id, secondaryRepo, downloadedSet)
+            for (ModuleVersionIdentifier id : artifactList) {
+                pullArtifact(repoUrls, id, repository, downloadedSet)
             }
         } catch (Throwable e) {
             e.printStackTrace()
@@ -161,7 +148,8 @@ class ArtifactDownloader {
     }
 
     private void pullArtifact(String[] repoUrls, ModuleVersionIdentifier artifact,
-                              File rootDestination, Set<ModuleVersionIdentifier> downloadedSet) throws IOException {
+                              File rootDestination, Set<ModuleVersionIdentifier> downloadedSet)
+            throws IOException {
         // ignore all android artifacts and already downloaded artifacts
         if (BaseTask.isAndroidArtifact(artifact) ||
                 BaseTask.isLocalArtifact(artifact) ||

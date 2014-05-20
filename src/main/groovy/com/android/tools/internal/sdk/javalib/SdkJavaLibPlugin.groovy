@@ -68,7 +68,7 @@ public class SdkJavaLibPlugin extends SdkFilesPlugin {
         copyDepTask = project.tasks.create("copyDependencies", CopyDependenciesTask)
         copyDepTask.outputDir = new File(sdkDir, "deps")
         copyDepTask.noticeDir = new File(sdkDir, "deps_notices")
-        copyDepTask.repoDir = new File(project.rootProject.cloneArtifacts.mainRepo)
+        copyDepTask.repoDir = new File(project.rootProject.cloneArtifacts.repository)
 
         // ----------
 
