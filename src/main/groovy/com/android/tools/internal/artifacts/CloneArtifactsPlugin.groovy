@@ -32,8 +32,6 @@ class CloneArtifactsPlugin implements Plugin<Project> {
         Task cloneArtifacts = project.tasks.create("cloneArtifacts")
         cloneArtifacts.setDescription("Clone dependencies")
 
-        PublishingExtension shippingExtension = project.extensions.create('publishing', PublishingExtension)
-
         Task setupTask = project.tasks.create("setupMaven")
         setupTask << {
             project.repositories {
@@ -48,9 +46,6 @@ class CloneArtifactsPlugin implements Plugin<Project> {
         // if this is the top project.
         if (project.rootProject == project) {
             def extension = project.extensions.create('cloneArtifacts', CloneArtifactsExtension)
-
-            // default shipping for root project is false
-            shippingExtension.isPublished = false
 
             DownloadArtifactsTask downloadArtifactsTask = project.tasks.create("downloadArtifacts",
                     DownloadArtifactsTask)

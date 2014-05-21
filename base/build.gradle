@@ -50,8 +50,7 @@ task aggregateResults(type: Copy) {
 }
 
 task prepareRepo(type: Copy) {
-    from { rootProject.cloneArtifacts.mainRepo }
-    from { rootProject.cloneArtifacts.secondaryRepo }
+    from { rootProject.cloneArtifacts.repository }
     into { "$rootProject.ext.androidHostOut/repo" }
 }
 
