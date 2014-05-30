@@ -1,5 +1,12 @@
 apply plugin: 'clone-artifacts'
 
+# Currently, the minimum requirement to run Android SDK tools is Java 1.6
+# So make sure that we are compiling with 1.6
+def jvmVersion = System.getProperty('java.version')
+if (!jvmVersion.startsWith('1.6')) {
+    throw new RuntimeException("Tools need to be compiled with Java 1.6, you are using Java $jvmVersion")
+}
+
 // artifact cloning destinations
 cloneArtifacts {
     repository = "$rootDir/../prebuilts/tools/common/m2/repository"
