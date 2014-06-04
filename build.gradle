@@ -7,7 +7,7 @@ repositories {
     maven { url = "$rootDir/../../prebuilts/tools/common/m2/internal" }
 }
 
-buildDir = "../../build/buildSrc"
+buildDir = "../../out/build/buildSrc/build"
 
 dependencies {
     compile gradleApi()
