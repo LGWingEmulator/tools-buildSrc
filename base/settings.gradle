@@ -1,3 +1,4 @@
+include ':base:api-generator'
 include ':base:ant-tasks'
 include ':base:archquery'
 include ':base:asset-studio'
@@ -28,6 +29,7 @@ include ':base:gradle'
 
 include ':base:templates'
 
+project(':base:api-generator'   ).projectDir = new File(rootDir, 'base/misc/api-generator')
 project(':base:ant-tasks'       ).projectDir = new File(rootDir, 'base/legacy/ant-tasks')
 project(':base:archquery'       ).projectDir = new File(rootDir, 'base/legacy/archquery')
 project(':base:dvlib'           ).projectDir = new File(rootDir, 'base/device_validator/dvlib')
