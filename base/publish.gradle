@@ -11,10 +11,6 @@ uploadArchives {
     repositories {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment ->
-                if (!project.has("release")) {
-                    throw new StopExecutionException("uploadArchives must be called with the release.gradle init script")
-                }
-
                 if (project.ext.sonatypeUsername.length() == 0 || project.ext.sonatypePassword.length() == 0) {
                     throw new StopExecutionException("uploadArchives cannot be called without sonatype username and password")
                 }
