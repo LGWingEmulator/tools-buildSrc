@@ -6,6 +6,7 @@
 # $4 = number of --parallel-thread (optional)
 
 PROG_DIR=$(dirname "$0")
+CURRENT_OS=$(uname | tr A-Z a-z)
 
 function die() {
   echo "$*" > /dev/stderr
@@ -33,15 +34,51 @@ if [[ -z "$DIST_DIR" ]]; then die "## Error: Missing destination folder"; fi
 if [[ -z "$BNUM"     ]]; then die "## Error: Missing build number"; fi
 
 TARGET="makeSdk"
-if [[ $(uname) == "Linux" ]]; then
+if [[ $CURRENT_OS == "linux" ]]; then
     TARGET="$TARGET makeWinSdk"
 fi
 
 cd "$PROG_DIR"
 
-set -x
-
 # temp disable --parallel builds
 #OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ../../gradlew -b ../../build.gradle --parallel-threads="${NUM_THREADS:-47}" --no-daemon makeSdk
-OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" BUILD_NUMBER="$BNUM" ../../gradlew -b ../../build.gradle --no-daemon $TARGET
+( set -x ; OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" BUILD_NUMBER="$BNUM" ../../gradlew -b ../../build.gradle --no-daemon $TARGET )
+
+
+# Generate repository XML metadata for release script
+
+LATEST_REPO_XSD=$(ls -1 ../../base/sdklib/src/main/java/com/android/sdklib/repository/sdk-repository-*.xsd | sort -r | head -n 1)
+
+SOURCE_PROPS=$PWD/../../../sdk/files/tools_source.properties
+ZIPS=""
+for OS in linux windows darwin; do
+    if [[ $OS == $CURRENT_OS || ( $CURRENT_OS == linux && $OS == windows ) ]]; then
+        ZIP="sdk-repo-$OS-tools-$BNUM.zip"
+        ZIPS="$ZIPS $OS $DIST_DIR/$ZIP:$ZIP"
+
+        # Package source.properties in the zip, it currently lacks it
+        ( set -x
+          cd $DIST_DIR
+          cp $SOURCE_PROPS source.properties
+          zip -9r $ZIP source.properties
+          rm source.properties
+        )
+
+        # We expect a "tools" folder in the zip file
+        ( set -x
+          cd $DIST_DIR
+          rm -rf tools
+          mkdir tools
+          cd tools
+          unzip -q ../$ZIP
+          cd ..
+          rm $ZIP
+          zip -9rq $ZIP tools
+          rm -rf tools
+        )
+    fi
+done
+
+( set -x ; ./mk_sdk_repo_xml.sh $DIST_DIR/repository.xml $LATEST_REPO_XSD tools $ZIPS )
+
 
