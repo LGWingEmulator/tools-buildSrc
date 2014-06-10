@@ -40,9 +40,9 @@ public class SdkToolsPlugin extends BaseSdkPlugin implements Plugin<Project> {
         Task makeTask = project.tasks.create("makeSdk")
 
         // prepare folders per platforms
-        Task makeLinuxTask = setupPlatform("linux")
-        Task makeMacTask = setupPlatform("darwin")
-        Task makeWinTask = setupPlatform("windows")
+        Task makeLinuxTask = setupPlatform("linux", "linux")
+        Task makeMacTask = setupPlatform("mac","darwin")
+        Task makeWinTask = setupPlatform("win", "windows")
 
         String os = System.getProperty("os.name");
         if (os.startsWith("Mac OS")) {
@@ -54,7 +54,7 @@ public class SdkToolsPlugin extends BaseSdkPlugin implements Plugin<Project> {
         }
     }
 
-    private Task setupPlatform(String platformName) {
+    private Task setupPlatform(String platformName, String plaformPkgName) {
         File root = new File(getSdkRoot(), platformName);
 
         File sdkRoot = new File(root, "tools")
@@ -82,9 +82,9 @@ public class SdkToolsPlugin extends BaseSdkPlugin implements Plugin<Project> {
         String buildNumber = System.getenv("BUILD_NUMBER")
         String zipName
         if (buildNumber == null) {
-            zipName = "sdk-repo-$platformName-tools.zip"
+            zipName = "sdk-repo-$plaformPkgName-tools.zip"
         } else {
-            zipName = "sdk-repo-$platformName-tools-${buildNumber}.zip"
+            zipName = "sdk-repo-$plaformPkgName-tools-${buildNumber}.zip"
         }
 
         zipFiles.setArchiveName(zipName)
