@@ -34,7 +34,7 @@ if [[ -z "$BNUM"     ]]; then die "## Error: Missing build number"; fi
 
 TARGET="makeSdk"
 if [[ $(uname) == "Linux" ]]; then
-    TARGET="$TARGET makeWindowsSdk"
+    TARGET="$TARGET makeWinSdk"
 fi
 
 cd "$PROG_DIR"
