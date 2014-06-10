@@ -41,8 +41,8 @@ public class SdkToolsPlugin extends BaseSdkPlugin implements Plugin<Project> {
 
         // prepare folders per platforms
         Task makeLinuxTask = setupPlatform("linux")
-        Task makeMacTask = setupPlatform("mac")
-        Task makeWinTask = setupPlatform("win")
+        Task makeMacTask = setupPlatform("darwin")
+        Task makeWinTask = setupPlatform("windows")
 
         String os = System.getProperty("os.name");
         if (os.startsWith("Mac OS")) {
@@ -78,7 +78,16 @@ public class SdkToolsPlugin extends BaseSdkPlugin implements Plugin<Project> {
         Zip zipFiles = project.tasks.create("zip${platformName.capitalize()}Sdk", Zip)
         zipFiles.from(sdkRoot)
         zipFiles.destinationDir = project.ext.androidHostDist
-        zipFiles.setArchiveName("$platformName-tools.zip")
+
+        String buildNumber = System.getenv("BUILD_NUMBER")
+        String zipName
+        if (buildNumber == null) {
+            zipName = "sdk-repo-$platformName-tools.zip"
+        } else {
+            zipName = "sdk-repo-$platformName-tools-${buildNumber}.zip"
+        }
+
+        zipFiles.setArchiveName(zipName)
         zipFiles.mustRunAfter copyFiles
 
         makeTask.description = "Packages the ${platformName.capitalize()} SDK Tools"

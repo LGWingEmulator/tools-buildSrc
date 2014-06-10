@@ -32,6 +32,10 @@ if [[ -z "$OUT_DIR"  ]]; then die "## Error: Missing out folder"; fi
 if [[ -z "$DIST_DIR" ]]; then die "## Error: Missing destination folder"; fi
 if [[ -z "$BNUM"     ]]; then die "## Error: Missing build number"; fi
 
+TARGET="makeSdk"
+if [[ $(uname) == "Linux" ]]; then
+    TARGET="$TARGET makeWindowsSdk"
+fi
 
 cd "$PROG_DIR"
 
@@ -39,5 +43,5 @@ set -x
 
 # temp disable --parallel builds
 #OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ../../gradlew -b ../../build.gradle --parallel-threads="${NUM_THREADS:-47}" --no-daemon makeSdk
-OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ../../gradlew -b ../../build.gradle --no-daemon makeSdk
+OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" BUILD_NUMBER="$BNUM" ../../gradlew -b ../../build.gradle --no-daemon $TARGET
 
