@@ -18,14 +18,13 @@ package com.android.tools.internal.nativesetup
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.nativebinaries.toolchain.Clang
+import org.gradle.nativebinaries.toolchain.Gcc
 /**
  */
 class NativeSetupPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-
-        project.apply plugin: 'windows-setup'
 
         project.model {
             platforms {
@@ -39,8 +38,11 @@ class NativeSetupPlugin implements Plugin<Project> {
                 }
             }
             toolChains {
-                host(Clang)
+                hostClang(Clang)
+                hostGcc(Gcc)
             }
         }
+
+        project.apply plugin: 'windows-setup'
     }
 }
