@@ -31,7 +31,7 @@ class WindowsSetupPlugin implements Plugin<Project> {
         }
 
         List<String> getCppCompilerArgs() {
-            []
+            ['-DUSE_MINGW', '-D__STDC_FORMAT_MACROS', '-D__STDC_CONSTANT_MACROS', '-D__USE_MINGW_ANSI_STDIO', '-m32']
         }
 
         List<String> getCCompilerArgs() {
@@ -78,7 +78,7 @@ class WindowsSetupPlugin implements Plugin<Project> {
 
                     getCCompiler().executable =         'x86_64-w64-mingw32-gcc'
                     getCppCompiler().executable =       'x86_64-w64-mingw32-g++'
-                    getLinker().executable =            'x86_64-w64-mingw32-gcc'
+                    getLinker().executable =            'x86_64-w64-mingw32-g++'
                     getAssembler().executable =         'x86_64-w64-mingw32-as'
                     getStaticLibArchiver().executable = 'x86_64-w64-mingw32-ar'
                 }
