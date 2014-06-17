@@ -26,6 +26,8 @@ class WindowsSetupPlugin implements Plugin<Project> {
 
     class MingwOnLinuxConfiguration implements TargetPlatformConfiguration {
 
+        List<String> customLinkerArgs = ['-m32']
+
         boolean supportsPlatform(Platform element) {
             return element.getOperatingSystem().name == "windows"
         }
@@ -51,7 +53,7 @@ class WindowsSetupPlugin implements Plugin<Project> {
         }
 
         List<String> getLinkerArgs() {
-            ['-m32']
+            customLinkerArgs
         }
 
         List<String> getStaticLibraryArchiverArgs() {
@@ -61,6 +63,8 @@ class WindowsSetupPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
+
+        project.ext.mingw = new MingwOnLinuxConfiguration()
 
         project.model {
             platforms {
@@ -74,7 +78,7 @@ class WindowsSetupPlugin implements Plugin<Project> {
                 mingw(Gcc) {
                     path "$project.rootDir/../prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8/bin"
 
-                    addPlatformConfiguration(new MingwOnLinuxConfiguration())
+                    addPlatformConfiguration(project.ext.mingw)
 
                     getCCompiler().executable =         'x86_64-w64-mingw32-gcc'
                     getCppCompiler().executable =       'x86_64-w64-mingw32-g++'
@@ -83,6 +87,31 @@ class WindowsSetupPlugin implements Plugin<Project> {
                     getStaticLibArchiver().executable = 'x86_64-w64-mingw32-ar'
                 }
             }
+        }
+
+        project.extensions.create("windows", WindowsExtension, project)
+    }
+
+    public static class WindowsExtension {
+        Project project
+
+        public WindowsExtension(Project project) {
+            this.project = project
+        }
+
+        public WindResTask createTask(String taskName,
+                String rcPath,
+                String imageFolderPath,
+                String objName) {
+
+            WindResTask task = project.tasks.create(taskName, WindResTask)
+
+            task.winResExe = project.file("$project.rootDir/../prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8/bin/x86_64-w64-mingw32-windres")
+            task.rcFile = project.file(rcPath)
+            task.imageFolder = project.file(imageFolderPath)
+            task.objFile = project.file("$project.buildDir/windres/$objName")
+
+            return task
         }
     }
 }
