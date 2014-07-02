@@ -26,6 +26,8 @@ class NativeSetupPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
 
+        String os = System.getProperty("os.name");
+
         project.model {
             platforms {
                 linux {
@@ -38,8 +40,11 @@ class NativeSetupPlugin implements Plugin<Project> {
                 }
             }
             toolChains {
-                hostClang(Clang)
-                hostGcc(Gcc)
+                if (os.startsWith("Mac OS")) {
+                    hostClang(Clang)
+                } else if (os.startsWith("Linux")) {
+                    hostGcc(Gcc)
+                }
             }
         }
 
