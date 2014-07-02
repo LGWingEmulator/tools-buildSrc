@@ -236,7 +236,7 @@ class PomHandler {
         } catch (SAXException e) {
             throw new IOException(e);
         } finally {
-            Closeables.closeQuietly(stream);
+            Closeables.close(stream, true /* swallowIOException */);
         }
     }
 }
