@@ -52,7 +52,7 @@ subprojects.each { subproject -> evaluationDependsOn(subproject.path) }
 def testTasks = subprojects.collect { it.tasks.withType(Test) }.flatten()
 
 task aggregateResults(type: Copy) {
-    from { testTasks*.binResultsDir }
+    from { testTasks*.binResultsDir*.parentFile*.parentFile }
     into { file("$buildDir/results") }
 }
 
