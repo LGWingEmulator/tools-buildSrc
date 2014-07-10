@@ -53,6 +53,18 @@ class ArtifactDownloader {
         this.repository = repository
     }
 
+    static class DownloadResult {
+        String repoUrl
+        File file
+
+        static DownloadResult with(String repoUrl, File file) {
+            DownloadResult r = new DownloadResult()
+            r.repoUrl = repoUrl
+            r.file = file
+            return r
+        }
+    }
+
     public void downloadArtifacts() {
 
         Set<ModuleVersionIdentifier> artifactList = Sets.newHashSet()
@@ -167,8 +179,8 @@ class ArtifactDownloader {
         String folder = getFolder(artifact)
 
         // download the artifact metadata file.
-        String repoUrl = tryToDownloadFile(repoUrls, folder, MAVEN_METADATA_XML, rootDestination,
-                true, false)
+        DownloadResult result = tryToDownloadFile(repoUrls, folder, MAVEN_METADATA_XML,
+                rootDestination, true, false, false)
 
         // move to the folder of the required version
         folder = folder + "/" + artifact.getVersion()
@@ -177,8 +189,16 @@ class ArtifactDownloader {
         String baseName = artifact.getName() + "-" + artifact.getVersion()
 
         // download the pom
-        File pomFile = downloadFile(repoUrl ,folder, baseName + DOT_POM, rootDestination,
-                false, true)
+        File pomFile
+        if (result == null) {
+            result = tryToDownloadFile(repoUrls, folder, baseName + DOT_POM,
+                    rootDestination, true, false, true)
+
+            pomFile = result.file
+        } else {
+            pomFile = downloadFile(result.repoUrl ,folder, baseName + DOT_POM, rootDestination,
+                    false, true)
+        }
 
         // read the pom to figure out parents, relocation and packaging
         if (!handlePom(repoUrls, pomFile, rootDestination, downloadedSet)) {
@@ -187,11 +207,11 @@ class ArtifactDownloader {
         }
 
         // download the jar artifact
-        downloadFile(repoUrl, folder, baseName + DOT_JAR, rootDestination, false, false)
+        downloadFile(result.repoUrl, folder, baseName + DOT_JAR, rootDestination, false, false)
 
         // download the source if available
         try {
-            downloadFile(repoUrl, folder, baseName + SOURCES_JAR, rootDestination, false, false)
+            downloadFile(result.repoUrl, folder, baseName + SOURCES_JAR, rootDestination, false, false)
         } catch (IOException ignored) {
             // ignore if missing
         }
@@ -202,20 +222,26 @@ class ArtifactDownloader {
 
     }
 
-    private String tryToDownloadFile(String[] repoUrls, String folder,
+    private DownloadResult tryToDownloadFile(String[] repoUrls, String folder,
                                             String name, File rootDestination,
-                                            boolean force, boolean printDownload) throws IOException {
+                                            boolean force, boolean printDownload,
+                                            boolean breakOnMissing)
+            throws IOException {
         for (String repoUrl : repoUrls) {
             try {
-                downloadFile(repoUrl, folder, name, rootDestination, force, printDownload)
-                return repoUrl
+                File f = downloadFile(repoUrl, folder, name, rootDestination, force, printDownload)
+                return DownloadResult.with(repoUrl, f)
             } catch (IOException ignored) {
                 // ignore
             }
         }
 
         // if we get here, the file was not found in any repo.
-        throw new IOException(String.format("Failed to find %s/%s in any repo", folder, name))
+        if (breakOnMissing) {
+            throw new IOException(String.format("Failed to find %s/%s in any repo", folder, name))
+        }
+
+        return null
     }
 
     private File downloadFile(String repoUrl, String folder, String name, File rootDestination,

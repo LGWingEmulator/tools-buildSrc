@@ -7,7 +7,7 @@ configurations {
     hidden
 }
 dependencies {
-    hidden "com.google.code.findbugs:findbugs:2.0.1"
+    hidden "com.google.code.findbugs:findbugs:2.0.3"
 }
 
 // set all java compilation to use UTF-8 encoding.
