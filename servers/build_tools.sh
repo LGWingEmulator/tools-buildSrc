@@ -5,6 +5,8 @@
 # $3 = build_number
 # $4 = number of --parallel-thread (optional)
 
+set -e
+
 PROG_DIR=$(dirname "$0")
 CURRENT_OS=$(uname | tr A-Z a-z)
 
