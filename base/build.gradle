@@ -79,3 +79,8 @@ task setupGradleInIde << {
    String command = "ln -s $link ${new File(project.ext.androidHostOut, "gradle-dist-link").path}"
    command.execute()
 }
+
+// The hierarchy viewer tests require loading SWT jar files.
+// That fails with the error saying "can't load 32 bit library on 64 bit JVM
+// Disable these tests from running until that is fixed
+tasks.findByPath(':swt:hierarchyviewer2lib:test').enabled = false
