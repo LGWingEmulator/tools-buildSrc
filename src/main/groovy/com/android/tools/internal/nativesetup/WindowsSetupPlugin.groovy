@@ -17,7 +17,6 @@
 package com.android.tools.internal.nativesetup
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.nativeplatform.platform.Platform
 import org.gradle.nativeplatform.toolchain.Gcc
 /**
  */
