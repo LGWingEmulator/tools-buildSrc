@@ -33,7 +33,6 @@ include ':base:integration-test'
 include ':base:project-test-lib'
 include ':base:project-test'
 
-
 include ':base:templates'
 
 project(':base:api-generator'   ).projectDir = new File(rootDir, 'base/misc/api-generator')
