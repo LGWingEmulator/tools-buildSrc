@@ -4,4 +4,4 @@ project.ext.buildVersion = '1.2.0-beta1'
 // This counter should be incremented every time the api is changed in not backward-compatible way,
 // i.e. it should be incremented from N to N+1 only when the api is changed in a way that existing
 // plugin v.N clients will be unable to work with v.N+1
-project.ext.apiVersion = 0
+project.ext.apiVersion = 2 
