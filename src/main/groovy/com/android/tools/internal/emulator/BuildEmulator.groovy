@@ -49,7 +49,7 @@ class BuildEmulator extends DefaultTask {
     void build() {
 
         String qemu2_deps_command = "$project.projectDir/android/scripts/build-qemu-android-deps.sh --verbose --force";
-        String qemu2_command = "$project.projectDir/android/scripts/build-qemu-android.sh --verbose --force --target=arm64,mips64,x86_64 " + (windows? "--host=windows-x86,windows-x86_64" : "")
+        String qemu2_command = "$project.projectDir/android/scripts/build-qemu-android.sh --verbose --force " + (windows? "--host=windows-x86,windows-x86_64" : "")
 
         String command = windows ?
                 "$project.projectDir/android-rebuild.sh --verbose --mingw --out-dir=$output --sdk-revision=$revision" :
