@@ -48,7 +48,6 @@ class BuildEmulator extends DefaultTask {
     @TaskAction
     void build() {
 
-        String qemu2_deps_command = "$project.projectDir/android/scripts/build-qemu-android-deps.sh --verbose --force";
         String qemu2_command = "$project.projectDir/android/scripts/build-qemu-android.sh --verbose --force " + (windows? "--host=windows-x86,windows-x86_64" : "")
 
         String command = windows ?
@@ -57,17 +56,6 @@ class BuildEmulator extends DefaultTask {
 
         StringBuilder stdout = new StringBuilder()
         StringBuilder stderr = new StringBuilder()
-
-        Process qemu2_deps_p = qemu2_deps_command.execute()
-        qemu2_deps_p.consumeProcessOutput(stdout, stderr)
-        int qemu2_deps_result = qemu2_deps_p.waitFor()
-
-        logger.log(LogLevel.INFO, stdout.toString())
-        logger.log(LogLevel.ERROR, stderr.toString())
-
-        if (qemu2_deps_result != 0) {
-            throw new BuildException("Failed to build qemu2 deps. See console output", null)
-        }
 
         Process qemu2_p = qemu2_command.execute()
         qemu2_p.consumeProcessOutput(stdout, stderr)
