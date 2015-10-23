@@ -62,9 +62,23 @@ class BuildEmulator extends DefaultTask {
         qemu2_deps_p.consumeProcessOutput(stdout, stderr)
         int qemu2_deps_result = qemu2_deps_p.waitFor()
 
+        logger.log(LogLevel.INFO, stdout.toString())
+        logger.log(LogLevel.ERROR, stderr.toString())
+
+        if (qemu2_deps_result != 0) {
+            throw new BuildException("Failed to build qemu2 deps. See console output", null)
+        }
+
         Process qemu2_p = qemu2_command.execute()
         qemu2_p.consumeProcessOutput(stdout, stderr)
         int qemu2_result = qemu2_p.waitFor()
+
+        logger.log(LogLevel.INFO, stdout.toString())
+        logger.log(LogLevel.ERROR, stderr.toString())
+
+        if (qemu2_result != 0) {
+            throw new BuildException("Failed to build qemu2. See console output", null)
+        }
 
         Process p = command.execute()
         p.consumeProcessOutput(stdout, stderr)
