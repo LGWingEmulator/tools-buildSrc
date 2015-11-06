@@ -48,25 +48,12 @@ class BuildEmulator extends DefaultTask {
     @TaskAction
     void build() {
 
-        String qemu2_command = "$project.projectDir/android/scripts/build-qemu-android.sh --verbose --force " + (windows? "--host=windows-x86,windows-x86_64" : "")
-
         String command = windows ?
                 "$project.projectDir/android-rebuild.sh --verbose --mingw --out-dir=$output --sdk-revision=$revision" :
                 "$project.projectDir/android-rebuild.sh --verbose --out-dir=$output --sdk-revision=$revision"
 
         StringBuilder stdout = new StringBuilder()
         StringBuilder stderr = new StringBuilder()
-
-        Process qemu2_p = qemu2_command.execute()
-        qemu2_p.consumeProcessOutput(stdout, stderr)
-        int qemu2_result = qemu2_p.waitFor()
-
-        logger.log(LogLevel.INFO, stdout.toString())
-        logger.log(LogLevel.ERROR, stderr.toString())
-
-        if (qemu2_result != 0) {
-            throw new BuildException("Failed to build qemu2. See console output", null)
-        }
 
         Process p = command.execute()
         p.consumeProcessOutput(stdout, stderr)
