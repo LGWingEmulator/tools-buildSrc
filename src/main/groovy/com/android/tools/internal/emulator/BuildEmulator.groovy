@@ -44,13 +44,15 @@ class BuildEmulator extends DefaultTask {
     @Input
     String revision
 
+    @Input
+    String build_number
 
     @TaskAction
     void build() {
 
         String command = windows ?
-                "$project.projectDir/android-rebuild.sh --verbose --mingw --out-dir=$output --sdk-revision=$revision" :
-                "$project.projectDir/android-rebuild.sh --verbose --out-dir=$output --sdk-revision=$revision"
+                "$project.projectDir/android-rebuild.sh --verbose --mingw --out-dir=$output --sdk-revision=$revision --sdk-build-number=$build_number" :
+                "$project.projectDir/android-rebuild.sh --verbose --out-dir=$output --sdk-revision=$revision --sdk-build-number=$build_number"
 
         StringBuilder stdout = new StringBuilder()
         StringBuilder stderr = new StringBuilder()
