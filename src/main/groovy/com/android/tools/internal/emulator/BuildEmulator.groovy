@@ -51,8 +51,8 @@ class BuildEmulator extends DefaultTask {
     void build() {
 
         String command = windows ?
-                "$project.projectDir/android-rebuild.sh --verbose --mingw --out-dir=$output --sdk-revision=$revision --sdk-build-number=$build_number" :
-                "$project.projectDir/android-rebuild.sh --verbose --out-dir=$output --sdk-revision=$revision --sdk-build-number=$build_number"
+                "$project.projectDir/android-rebuild.sh --verbose --mingw --out-dir=$output --sdk-revision=$revision --sdk-build-number=$build_number --symbols --crash-prod" :
+                "$project.projectDir/android-rebuild.sh --verbose --out-dir=$output --sdk-revision=$revision --sdk-build-number=$build_number --symbols --crash-prod"
 
         StringBuilder stdout = new StringBuilder()
         StringBuilder stderr = new StringBuilder()
@@ -68,5 +68,26 @@ class BuildEmulator extends DefaultTask {
         if (result != 0) {
             throw new BuildException("Failed to run command. See console output", null)
         }
+
+        /**
+         * Upload the symbols
+         */
+        command = "$project.projectDir/android/scripts/upload-symbols.sh --crash-prod --symbol-dir=$output/build/symbols"
+
+        stdout = new StringBuilder()
+        stderr = new StringBuilder()
+
+        p = command.execute()
+        p.consumeProcessOutput(stdout, stderr)
+
+        result = p.waitFor()
+
+        logger.log(LogLevel.INFO, stdout.toString())
+        logger.log(LogLevel.ERROR, stderr.toString())
+
+        if (result != 0) {
+            throw new BuildException("Failed to run command. See console output", null)
+        }
+
     }
 }
