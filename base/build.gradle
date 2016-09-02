@@ -1,46 +1,8 @@
-apply plugin: 'clone-artifacts'
-
-// Currently, the minimum requirement to run Android SDK tools is Java 1.6
-// So make sure that we are compiling with 1.6
-task('checkJavaVersion') << {
-    def jvmVersion = System.getProperty('java.version')
-    def requiredVersion = System.getenv('JAVA_FOR_TESTS') ?: '1.6'
-    if (!jvmVersion.startsWith(requiredVersion)) {
-        throw new RuntimeException("Tools need to be compiled with Java $requiredVersion, you are using Java $jvmVersion.")
-    }
-}
-final def checkJavaVersionTask = tasks['checkJavaVersion']
-
 allprojects { subproject ->
     tasks.withType(JavaForkOptions) {
         // Prevent forked processes from stealing focus (on MacOS at least)
         jvmArgs '-Djava.awt.headless=true'
     }
-
-    afterEvaluate {
-        // Only check if we are doing build type tasks. Things like dependency listing
-        // should still work with a "wrong" java version.
-        final def buildTasks = ['build', 'compileJava', 'compileGroovy', 'classes', 'assemble', 'javadoc', 'groovydoc', 'check']
-        // Task.doFirst does not run if the task has no work to do. Need to be more aggressive than that.
-        // Some projects won't have all of these tasks, so need to use findByName.
-        buildTasks.each { subproject.tasks.findByName(it)?.dependsOn(checkJavaVersionTask) }
-    }
-}
-
-// artifact cloning destinations
-cloneArtifacts {
-    repository = "$rootDir/../prebuilts/tools/common/m2/repository"
-}
-
-if (System.env.USE_EXTERNAL_REPO != null) {
-  allprojects {
-    repositories {
-        maven { url = uri(rootProject.cloneArtifacts.repository) }
-        jcenter()
-        maven { url 'https://repo.gradle.org/gradle/libs-snapshots-local' }
-        maven { url 'https://repo.gradle.org/gradle/libs-releases-local' }
-    }
-  }
 }
 
 /*
@@ -63,10 +25,8 @@ if (System.env.DIST_DIR != null && System.env.OUT_DIR != null) {
 // rootProject.buildDir is specific to this gradle build.
 buildDir = new File(ext.androidHostOut, "build/root")
 
-
 // apply this after the buildDir has been changed.
-apply plugin: 'sdk-tools'
-
+apply plugin: 'sdk-emulator'
 
 ext.localRepo = project.hasProperty('localRepo') ? localRepo : "$ext.androidHostOut/repo"
 
@@ -126,8 +86,6 @@ task setupGradleInIde << {
 task dist << {
 }
 
-apply plugin: 'offline-repo'
-
 task clean << {
   delete 'build'
 
@@ -143,9 +101,4 @@ task init {
   dependsOn prepareRepo
   dependsOn setupGradleInIde
   dependsOn copyGradleProperty
-  Task constants = tasks.findByPath(':base:builder:generateVersionConstantsJava')
-  if (constants != null) {
-    dependsOn constants
-  }
 }
-

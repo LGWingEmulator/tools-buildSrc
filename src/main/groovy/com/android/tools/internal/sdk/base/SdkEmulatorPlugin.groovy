@@ -25,14 +25,14 @@ import org.gradle.api.tasks.bundling.Zip
 
 /**
  * Plugin for the root project. This orchestrates the output of all the modules
- * into the SDK Tools package
+ * into the emulator package
  */
-public class SdkToolsPlugin extends BaseSdkPlugin implements Plugin<Project> {
+public class SdkEmulatorPlugin extends BaseSdkPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
         if (!project.equals(project.rootProject)) {
-            throw new RuntimeException("sdk-tools plugin must be applied to root project only")
+            throw new RuntimeException("sdk-emulator plugin must be applied to root project only")
         }
 
         super.apply(project)
@@ -57,8 +57,8 @@ public class SdkToolsPlugin extends BaseSdkPlugin implements Plugin<Project> {
     private Task setupPlatform(String platformName, String plaformPkgName) {
         File root = new File(getSdkRoot(), platformName);
 
-        File sdkRoot = new File(root, "tools")
-        File sdkDebugRoot = new File(root, "tools.debug")
+        File sdkRoot = new File(root, "emulator")
+        File sdkDebugRoot = new File(root, "emulator.debug")
 
         Task makeTask = project.tasks.create("make${platformName.capitalize()}Sdk")
 
@@ -79,7 +79,7 @@ public class SdkToolsPlugin extends BaseSdkPlugin implements Plugin<Project> {
         copyFiles.mustRunAfter cleanFolder
 
         Zip zipFiles = project.tasks.create("zip${platformName.capitalize()}Sdk", Zip)
-        zipFiles.from(root).include("tools/**")
+        zipFiles.from(root).include("emulator/**")
         zipFiles.destinationDir = project.ext.androidHostDist
 
         Zip zipDebugFiles = project.tasks.create("zip${platformName.capitalize()}DebugSdk", Zip)
@@ -90,11 +90,11 @@ public class SdkToolsPlugin extends BaseSdkPlugin implements Plugin<Project> {
         String zipName
         String zipDebugName
         if (buildNumber == null) {
-            zipName = "sdk-repo-$plaformPkgName-tools.zip"
-            zipDebugName = "sdk-repo-$plaformPkgName-debug-tools.zip"
+            zipName = "sdk-repo-$plaformPkgName-emulator.zip"
+            zipDebugName = "sdk-repo-$plaformPkgName-debug-emulator.zip"
         } else {
-            zipName = "sdk-repo-$plaformPkgName-tools-${buildNumber}.zip"
-            zipDebugName = "sdk-repo-$plaformPkgName-debug-tools-${buildNumber}.zip"
+            zipName = "sdk-repo-$plaformPkgName-emulator-${buildNumber}.zip"
+            zipDebugName = "sdk-repo-$plaformPkgName-debug-emulator-${buildNumber}.zip"
         }
 
         zipFiles.setArchiveName(zipName)
@@ -103,7 +103,7 @@ public class SdkToolsPlugin extends BaseSdkPlugin implements Plugin<Project> {
         zipDebugFiles.setArchiveName(zipDebugName)
         zipDebugFiles.mustRunAfter cleanFolder
 
-        makeTask.description = "Packages the ${platformName.capitalize()} SDK Tools"
+        makeTask.description = "Packages the ${platformName.capitalize()} emulator"
         makeTask.group = "Android SDK"
         makeTask.dependsOn cleanFolder, copyFiles, zipFiles, zipDebugFiles
         project.afterEvaluate {

@@ -51,13 +51,8 @@ cd "$PROG_DIR"
 
 GRADLE_FLAGS="--no-daemon --info"
 
-# first build Eclipse/Monitor
 ( set -x ; OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" BUILD_NUMBER="$BNUM" ../../gradlew -b ../../build.gradle $GRADLE_FLAGS  publishLocal ) || exit $?
-( set -x ; OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" BUILD_NUMBER="$BNUM" ../../gradlew -b ../../../sdk/eclipse/build.gradle $GRADLE_FLAGS copydeps buildEclipse ) || exit $?
 
 # temp disable --parallel builds
 #OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ../../gradlew -b ../../build.gradle --parallel-threads="${NUM_THREADS:-47}" $GRADLE_FLAGS makeSdk
-( set -x ; OUT_DIR="$OUT_DIR" DIST_DIR="$OUT_DIR/emu-only-dist" BUILD_NUMBER="$BNUM" ../../gradlew --stacktrace -b ../../build.gradle -c ../../settings-emu-only.gradle $GRADLE_FLAGS $TARGET ) || exit $?
-( set -x ; OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" BUILD_NUMBER="$BNUM" ../../gradlew -b ../../build.gradle $GRADLE_FLAGS dist makeSdk ) || exit $?
-
-for i in `find "$OUT_DIR"/emu-only-dist/*.zip`; do cp $i  "$DIST_DIR"/$(basename $(echo $i|sed 's/\.zip/-emu-only.zip/'));done
+( set -x ; OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" BUILD_NUMBER="$BNUM" ../../gradlew -b ../../build.gradle $GRADLE_FLAGS $TARGET ) || exit $?
