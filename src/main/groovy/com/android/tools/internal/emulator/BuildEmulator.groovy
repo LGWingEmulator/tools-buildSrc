@@ -92,8 +92,8 @@ class BuildEmulator extends DefaultTask {
     void build() {
 
         String command = windows ?
-                "$project.projectDir/android-rebuild.sh --verbose --mingw --out-dir=$output --sdk-revision=$revision --sdk-build-number=$build_number --symbols --crash-prod" :
-                "$project.projectDir/android-rebuild.sh --verbose --out-dir=$output --sdk-revision=$revision --sdk-build-number=$build_number --symbols --crash-prod"
+                "$project.projectDir/android/rebuild.sh --verbose --mingw --out-dir=$output --sdk-revision=$revision --sdk-build-number=$build_number --symbols --crash-prod" :
+                "$project.projectDir/android/rebuild.sh --verbose --out-dir=$output --sdk-revision=$revision --sdk-build-number=$build_number --symbols --crash-prod"
 
         LoggerWriter stdout = new LoggerWriter(logger, LogLevel.INFO)
         LoggerWriter stderr = new LoggerWriter(logger, LogLevel.ERROR)
@@ -104,7 +104,7 @@ class BuildEmulator extends DefaultTask {
         int result = p.waitFor()
 
         if (result != 0) {
-            throw new BuildException("Failed to run android-rebuild command. See console output", null)
+            throw new BuildException("Failed to run android/rebuild.sh command. See console output", null)
         }
 
         stdout.reset();
