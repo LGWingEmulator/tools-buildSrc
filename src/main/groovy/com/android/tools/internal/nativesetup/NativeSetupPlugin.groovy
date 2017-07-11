@@ -31,11 +31,11 @@ class NativeSetupPlugin implements Plugin<Project> {
         project.model {
             platforms {
                 linux {
-                    architecture "i386"
+                    architecture "x86_64"
                     operatingSystem "linux"
                 }
                 darwin {
-                    architecture "i386"
+                    architecture "x86_64"
                     operatingSystem "osx"
                 }
             }
