@@ -22,6 +22,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.bundling.Zip
+import org.gradle.api.tasks.Copy
 
 /**
  * Plugin for the root project. This orchestrates the output of all the modules
@@ -78,6 +79,11 @@ public class SdkEmulatorPlugin extends BaseSdkPlugin implements Plugin<Project> 
         copyFiles.noticeTaskNames = noticeTaskNames
         copyFiles.mustRunAfter cleanFolder
 
+        Task copyBuildInfo = project.tasks.create("copyBuild${platformName.capitalize()}Info", Copy)
+        copyBuildInfo.from(sdkRoot).include("android-info.txt")
+        copyBuildInfo.destinationDir = project.ext.androidHostDist
+        copyBuildInfo.mustRunAfter copyFiles
+
         Zip zipFiles = project.tasks.create("zip${platformName.capitalize()}Sdk", Zip)
         zipFiles.from(root).include("emulator/**").exclude("**/*upstream*")
         zipFiles.destinationDir = project.ext.androidHostDist
@@ -105,7 +111,7 @@ public class SdkEmulatorPlugin extends BaseSdkPlugin implements Plugin<Project> 
 
         makeTask.description = "Packages the ${platformName.capitalize()} emulator"
         makeTask.group = "Android SDK"
-        makeTask.dependsOn cleanFolder, copyFiles, zipFiles, zipDebugFiles
+        makeTask.dependsOn cleanFolder, copyFiles, zipFiles, zipDebugFiles, copyBuildInfo
         project.afterEvaluate {
             List<Task> copyTasks = Lists.newArrayList()
 
