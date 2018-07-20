@@ -79,6 +79,11 @@ public class SdkEmulatorPlugin extends BaseSdkPlugin implements Plugin<Project> 
         copyFiles.noticeTaskNames = noticeTaskNames
         copyFiles.mustRunAfter cleanFolder
 
+        Task copyCodeCoverage = project.tasks.create("copyBuild${platformName.capitalize()}CodeCoverage", Copy)
+        copyCodeCoverage.from(sdkDebugRoot).include("**/*code-coverage.zip")
+        copyCodeCoverage.destinationDir = project.ext.androidHostDist
+        copyCodeCoverage.mustRunAfter copyFiles
+
         Task copyBuildInfo = project.tasks.create("copyBuild${platformName.capitalize()}Info", Copy)
         copyBuildInfo.from(sdkRoot).include("android-info.txt")
         copyBuildInfo.destinationDir = project.ext.androidHostDist
@@ -89,7 +94,9 @@ public class SdkEmulatorPlugin extends BaseSdkPlugin implements Plugin<Project> 
         zipFiles.destinationDir = project.ext.androidHostDist
 
         Zip zipDebugFiles = project.tasks.create("zip${platformName.capitalize()}DebugSdk", Zip)
-        zipDebugFiles.from(sdkDebugRoot)
+        // Tool items do not support multiple labels (only release/debug). We don't want
+        // The code-coverage zip to end up in th final debug/release zip. (b/111696853)
+        zipDebugFiles.from(sdkDebugRoot).exclude("**/*code-coverage.zip")
         zipDebugFiles.destinationDir = project.ext.androidHostDist
 
         String buildNumber = System.getenv("BUILD_NUMBER")
@@ -111,7 +118,7 @@ public class SdkEmulatorPlugin extends BaseSdkPlugin implements Plugin<Project> 
 
         makeTask.description = "Packages the ${platformName.capitalize()} emulator"
         makeTask.group = "Android SDK"
-        makeTask.dependsOn cleanFolder, copyFiles, zipFiles, zipDebugFiles, copyBuildInfo
+        makeTask.dependsOn cleanFolder, copyFiles, zipFiles, zipDebugFiles, copyBuildInfo, copyCodeCoverage
         project.afterEvaluate {
             List<Task> copyTasks = Lists.newArrayList()
 

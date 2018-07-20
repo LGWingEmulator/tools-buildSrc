@@ -82,6 +82,9 @@ class BuildEmulator extends DefaultTask {
     }
 
     boolean windows = false
+
+    // True if this is a full debug build which includes coverage.
+    boolean debug = false
     @Input
     String revision
 
@@ -91,9 +94,18 @@ class BuildEmulator extends DefaultTask {
     @TaskAction
     void build() {
 
-        String command = windows ?
-                "$project.projectDir/android/rebuild.sh --verbose --mingw --out-dir=$output --sdk-revision=$revision --sdk-build-number=$build_number --symbols --crash-prod" :
-                "$project.projectDir/android/rebuild.sh --verbose --out-dir=$output --sdk-revision=$revision --sdk-build-number=$build_number --symbols --crash-prod"
+        String command = "$project.projectDir/android/rebuild.sh --verbose --out-dir=$output --sdk-revision=$revision --sdk-build-number=$build_number"
+
+
+        if (windows) {
+            command = command + " --mingw"
+        }
+
+        if (debug) {
+            command = command + " --debug"
+        } else {
+            command = command + " --symbols --crash-prod"
+        }
 
         LoggerWriter stdout = new LoggerWriter(logger, LogLevel.INFO)
         LoggerWriter stderr = new LoggerWriter(logger, LogLevel.ERROR)
@@ -110,15 +122,21 @@ class BuildEmulator extends DefaultTask {
         stdout.reset();
         stderr.reset();
 
+        if (!debug) {
+            uploadSymbols(stdout, stderr)
+        }
+    }
+
+    void uploadSymbols(LoggerWriter stdout, LoggerWriter stderr) {
         /**
          * Upload the symbols
          */
-        command = "$project.projectDir/android/scripts/upload-symbols.sh --crash-prod --symbol-dir=$output/build/symbols"
+        String command = "$project.projectDir/android/scripts/upload-symbols.sh --crash-prod --symbol-dir=$output/build/symbols"
 
-        p = command.execute()
+        Process p = command.execute()
         p.consumeProcessOutput(stdout, stderr)
 
-        result = p.waitFor()
+        int result = p.waitFor()
 
         /*
           upload symbols throws errors intermittently due to use of xargs
