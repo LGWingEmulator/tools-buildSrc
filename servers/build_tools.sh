@@ -42,17 +42,12 @@ then
     popd
 fi
 
-TARGET="dist makeSdk"
+# Of course we are running on build bots that have old.. old.. stuff on them.
+# So let's make sure we have enums available.
+pip install enum34 --user
+python $PROG_DIR/build.py --out_dir $OUT_DIR --dist_dir $DIST_DIR --build-id $BNUM
+
 if [[ $CURRENT_OS == "linux" ]]; then
-    TARGET="$TARGET makeWinSdk"
+  # Let's also build mingw.
+  python $PROG_DIR/build.py --out_dir $OUT_DIR --dist_dir $DIST_DIR --build-id $BNUM --target Mingw
 fi
-
-cd "$PROG_DIR"
-
-GRADLE_FLAGS="--no-daemon --info"
-
-( set -x ; OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" BUILD_NUMBER="$BNUM" ../../gradlew -b ../../build.gradle $GRADLE_FLAGS  publishLocal ) || exit $?
-
-# temp disable --parallel builds
-#OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ../../gradlew -b ../../build.gradle --parallel-threads="${NUM_THREADS:-47}" $GRADLE_FLAGS makeSdk
-( set -x ; OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" BUILD_NUMBER="$BNUM" ../../gradlew -b ../../build.gradle $GRADLE_FLAGS $TARGET ) || exit $?

@@ -84,6 +84,7 @@ class BuildEmulator extends DefaultTask {
     }
 
     boolean windows = false
+    boolean msvc = false
 
     // True if this is a full debug build which includes coverage.
     boolean debug = false
@@ -96,21 +97,25 @@ class BuildEmulator extends DefaultTask {
     @TaskAction
     void build() {
 
-        String command = "$project.projectDir/android/rebuild.sh --verbose --out-dir=$output --sdk-revision=$revision --sdk-build-number=$build_number"
+        String command = "python $project.projectDir/android/build/python/cmake.py --noshowprefixforinfo --out $output --sdk_revision $revision --sdk_build_number $build_number"
         String prefix = "["
 
 
         if (windows) {
-            command = command + " --mingw"
-            prefix = prefix + "win-"
-
-        }
+            if ("True".equals(System.getenv("MINGW"))) {
+                command = command + " --target mingw"
+                prefix = prefix + "mingw-"
+            } else {
+                command = command + " --target windows"
+                prefix = prefix + "win-"
+            }
+         }
 
         if (debug) {
-            command = command + " --debug"
+            command = command + " --config debug"
             prefix = prefix + "dbg"
         } else {
-            command = command + " --symbols --crash-prod"
+            command = command + " --symbols --crash prod --symbol_dest prod"
             prefix = prefix + "rel"
         }
         prefix = prefix + "] "
@@ -118,28 +123,26 @@ class BuildEmulator extends DefaultTask {
         LoggerWriter stdout = new LoggerWriter(logger, LogLevel.INFO, prefix)
         LoggerWriter stderr = new LoggerWriter(logger, LogLevel.ERROR, prefix)
 
+        logger.info("Running: " + command)
         Process p = command.execute()
         p.consumeProcessOutput(stdout, stderr)
 
         int result = p.waitFor()
 
         if (result != 0) {
-            throw new BuildException("Failed to run android/rebuild.sh command. See console output", null)
+            throw new BuildException("Failed to run android/buid/python/cmake.py command. See console output", null)
         }
 
         stdout.reset();
         stderr.reset();
 
-        if (!debug) {
-            uploadSymbols(stdout, stderr)
-        }
     }
 
     void uploadSymbols(LoggerWriter stdout, LoggerWriter stderr) {
         /**
          * Upload the symbols
          */
-        String command = "$project.projectDir/android/scripts/upload-symbols.sh --crash-prod --symbol-dir=$output/build/symbols --verbose --verbose"
+        String command = "$project.projectDir/android/scripts/upload-symbols.py --crash-prod --symbol-dir=$output/build/symbols --verbose --verbose"
 
         Process p = command.execute()
         p.consumeProcessOutput(stdout, stderr)
