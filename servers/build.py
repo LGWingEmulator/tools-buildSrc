@@ -24,7 +24,6 @@ import platform
 import sys
 import subprocess
 
-from enum import Enum
 from Queue import Queue
 from threading import Thread
 
@@ -71,17 +70,6 @@ def run(cmd, env):
                         (' '.join(cmd), proc.returncode))
 
 
-class Target(Enum):
-    """Supported targets."""
-    windows = 'Windows'
-    darwin = 'Darwin'
-    linux = 'Linux'
-    mingw = 'Mingw'
-
-    def __str__(self):
-        return self.name
-
-
 def install_deps():
     run(['python', os.path.join(AOSP_ROOT, 'external', 'qemu', 'android',
                                 'build', 'python', 'setup.py'), 'develop', '--user'], {})
@@ -97,7 +85,7 @@ def main(argv):
                         help="The destination directory")
     parser.add_argument("--build-id", type=str, default=[], required=True,
                         dest='build_id',  help="The emulator build number")
-    parser.add_argument("--target", type=Target, default=platform.system(),
+    parser.add_argument("--target", type=str, default=platform.system(),
                         help="The build target, defaults to current os")
 
     args = parser.parse_args()
@@ -110,10 +98,10 @@ def main(argv):
 
     mingw = False
     sdk = 'makeSdk'
-    if args.target == Target.windows:
+    if args.target == 'Windows':
         sdk = 'makeWinSdk'
 
-    if args.target == Target.mingw:
+    if args.target == 'Mingw':
         sdk = 'makeWinSdk'
         mingw = True
 
