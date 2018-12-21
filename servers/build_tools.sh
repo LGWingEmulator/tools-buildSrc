@@ -44,7 +44,10 @@ fi
 
 # Of course we are running on build bots that have old.. old.. stuff on them.
 # So let's make sure we have enums available.
-pip install enum34 --user
+if [[ $CURRENT_OS == "linux" ]]; then
+  pip install enum34 --user
+fi
+
 python $PROG_DIR/build.py --out_dir $OUT_DIR --dist_dir $DIST_DIR --build-id $BNUM
 
 if [[ $CURRENT_OS == "linux" ]]; then
