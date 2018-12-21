@@ -48,9 +48,9 @@ if [[ $CURRENT_OS == "linux" ]]; then
   pip install enum34 --user
 fi
 
-python $PROG_DIR/build.py --out_dir $OUT_DIR --dist_dir $DIST_DIR --build-id $BNUM
+python $PROG_DIR/build_tools.py --out_dir $OUT_DIR --dist_dir $DIST_DIR --build-id $BNUM
 
 if [[ $CURRENT_OS == "linux" ]]; then
   # Let's also build mingw.
-  python $PROG_DIR/build.py --out_dir $OUT_DIR --dist_dir $DIST_DIR --build-id $BNUM --target Mingw
+  python $PROG_DIR/build_tools.py --out_dir $OUT_DIR --dist_dir $DIST_DIR --build-id $BNUM --target Mingw
 fi
