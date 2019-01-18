@@ -97,7 +97,7 @@ class BuildEmulator extends DefaultTask {
     @TaskAction
     void build() {
 
-        String command = "python $project.projectDir/android/build/python/cmake.py --noshowprefixforinfo --out $output --sdk_revision $revision --sdk_build_number $build_number"
+        String command = "python $project.projectDir/android/build/python/cmake.py --qtwebengine False --noshowprefixforinfo --out $output --sdk_revision $revision --sdk_build_number $build_number"
         String prefix = "["
 
 
