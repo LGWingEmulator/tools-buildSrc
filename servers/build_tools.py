@@ -56,11 +56,14 @@ def run(cmd, env):
     logging.info(' '.join(cmd))
     cmd_env = os.environ.copy()
     cmd_env.update(env)
+    is_windows = (platform.system() == 'Windows')
 
     proc = subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        shell=is_windows, # Make sure windows propagates ENV vars properly.
+        cwd=AOSP_ROOT,
         env=cmd_env)
 
     log_std_out(proc)
