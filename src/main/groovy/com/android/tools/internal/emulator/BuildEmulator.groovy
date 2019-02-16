@@ -44,7 +44,7 @@ class BuildEmulator extends DefaultTask {
 
         @Override
         public void write(int b) {
-            if ((char)b == '\n' || (char)b == '\r') {
+            if ((char)b == '\n') {
                 this.flush();
             } else {
                 super.write(b)
@@ -55,11 +55,7 @@ class BuildEmulator extends DefaultTask {
         void write(byte[] b, int off, int len) {
             int lastindex = 0;
             for (int i = 0; i < len; i ++) {
-                if ((char)b[off+i] == '\n' || (char)b[off+i] == '\r') {
-                    super.write(b, off+lastindex, i-lastindex);
-                    lastindex = i+1;
-                    this.flush();
-                }
+              this.write(b[i]);
             }
         }
 
