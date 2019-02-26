@@ -113,7 +113,8 @@ def main(argv):
   args = parser.parse_args()
   version = "{0[0]}.{0[1]}.{0[2]}".format(sys.version_info)
   log_line("inf", "Building on {} - {}, Python: {}".format(platform.system(),
-                                                            platform.uname(), version))
+                                                            platform.uname(),
+                                                            version))
 
   target = platform.system().lower()
   if args.target:
@@ -139,7 +140,7 @@ def main(argv):
       "--sdk_build_number", args.build_id, "--target", target, "--dist",
       args.dist_dir
   ]
-  prod = ["--crash", "prod", "--symbols", "--symbol_dest", "prod"]
+  prod = ["--crash", "prod"]
   debug = ["--config", "debug"]
 
 

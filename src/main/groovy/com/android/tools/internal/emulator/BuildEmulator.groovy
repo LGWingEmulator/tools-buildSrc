@@ -111,7 +111,7 @@ class BuildEmulator extends DefaultTask {
             command = command + " --config debug"
             prefix = prefix + "dbg"
         } else {
-            command = command + " --symbols --crash prod --symbol_dest prod"
+            command = command + " --crash prod"
             prefix = prefix + "rel"
         }
         prefix = prefix + "] "
