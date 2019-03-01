@@ -116,8 +116,8 @@ def main(argv):
                                                             platform.uname(), version))
 
   target = platform.system().lower()
-  if args.target == "Mingw":
-    target = "mingw"
+  if args.target:
+      target = args.target.lower()
 
   if not os.path.isabs(args.out_dir):
     args.out_dir = os.path.join(AOSP_ROOT, args.out_dir)
