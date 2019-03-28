@@ -44,10 +44,10 @@ fi
 
 # Of course we are running on build bots that have old.. old.. stuff on them.
 # So let's make sure we have enums available.
-if [[ $CURRENT_OS == "linux" ]]; then
+# if [[ $CURRENT_OS == "linux" ]]; then
   # our gce instances pip is broken b/129467161
   # pip install enum34 --user
-fi
+# fi
 
 python $PROG_DIR/build_tools.py --out_dir $OUT_DIR --dist_dir $DIST_DIR --build-id $BNUM
 
