@@ -13,23 +13,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-import logging
 import argparse
 import datetime
+import logging
 import os
 import platform
-import sys
 import subprocess
+import sys
 import time
-
-from server_config import ServerConfig
 
 from Queue import Queue
 from threading import Thread
+
+from server_config import ServerConfig
 
 AOSP_ROOT = os.path.abspath(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", ".."))
@@ -93,6 +91,10 @@ def install_deps():
     ], {}, "dep")
 
 
+def is_presubmit(build_id):
+    return build_id.startswith("P")
+
+
 def main(argv):
     logging.basicConfig(format="%(message)s", level=logging.INFO)
     parser = argparse.ArgumentParser(
@@ -139,7 +141,7 @@ def main(argv):
     ]
 
     # Standard arguments for both debug & production.
-    args = [
+    cmd = [
         "--noqtwebengine", "--noshowprefixforinfo", "--out", args.out_dir,
         "--sdk_build_number", args.build_id, "--target", target, "--dist",
         args.dist_dir
@@ -148,9 +150,9 @@ def main(argv):
     debug = ["--config", "debug"]
 
     # Kick of builds for 2 targets. (debug/release)
-    with ServerConfig() as cfg:
-        run(launcher + args + prod, {}, "rel")
-        run(launcher + args + debug, {}, "dbg")
+    with ServerConfig(is_presubmit(args.build_id)) as cfg:
+        run(launcher + cmd + prod, cfg.get_env(), "rel")
+        run(launcher + cmd + debug, cfg.get_env(), "dbg")
 
     log_line("inf", "Build completed!")
 
