@@ -37,6 +37,7 @@ class ServerConfig(object):
     def __init__(self, presubmit):
         self.presubmit = presubmit
         self.env = os.environ.copy()
+        self.ccache = find_executable('ccache')
 
     def get_env(self):
         return self.env
@@ -50,15 +51,18 @@ class ServerConfig(object):
         # Never run ccache outside of presubmit, even if it might be available.
         if not self.presubmit:
             self.env['CCACHE_DISABLE'] = 'True'
+            logging.info('Disabling ccache.')
         else:
             # We cannot rely on mtime for compiler identification as the build bots
             # do a fresh checkout of the compiler.
             self.env['CCACHE_COMPILERCHECK'] = 'string:%compiler% --version'
+            if self.ccache:
+                logging.info('Enabling ccache.')
         return self
 
     def __exit__(self, exc_type, exc_value, tb):
         # We clear the cache in case of failures.
         if exc_type and exc_value:
-            ccache = find_executable('ccache')
-            if ccache:
-                subprocess.call([ccache, '-C'])
+            if self.ccache:
+                logging.info('Clearing ccache.')
+                subprocess.call([self.ccache, '-C'])

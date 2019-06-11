@@ -16,26 +16,21 @@
 from __future__ import absolute_import, division, print_function
 
 import argparse
-import datetime
+import json
 import logging
 import os
 import platform
 import subprocess
 import sys
-import time
-
 from Queue import Queue
-from threading import Thread
+from threading import Thread, currentThread
 
 from server_config import ServerConfig
+from time_formatter import TimeFormatter
 
 AOSP_ROOT = os.path.abspath(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", ".."))
 TOOLS = os.path.join(AOSP_ROOT, "tools")
-
-
-start_time = time.time()
-
 
 def _reader(pipe, queue):
     try:
@@ -46,27 +41,26 @@ def _reader(pipe, queue):
         queue.put(None)
 
 
-def log_line(prefix, line):
-    passed = datetime.timedelta(seconds=time.time() - start_time)
-    logging.info("%s %s| %s", passed, prefix, line.strip())
-
-
-def log_std_out(proc, log_prefix):
+def log_std_out(proc):
     """Logs the output of the given process."""
     q = Queue()
     Thread(target=_reader, args=[proc.stdout, q]).start()
     Thread(target=_reader, args=[proc.stderr, q]).start()
     for _ in range(2):
         for _, line in iter(q.get, None):
-            log_line(log_prefix, line)
+            logging.info(line)
 
 
 def run(cmd, env, log_prefix):
-    log_line(log_prefix, "=" * 120)
-    log_line(log_prefix, " ".join(cmd))
+    currentThread().setName(log_prefix)
     cmd_env = os.environ.copy()
     cmd_env.update(env)
     is_windows = (platform.system() == "Windows")
+
+    logging.info("=" * 140)
+    logging.info(json.dumps(cmd_env,sort_keys=True))
+    logging.info(" ".join(cmd))
+    logging.info("=" * 140)
 
     proc = subprocess.Popen(
         cmd,
@@ -76,7 +70,7 @@ def run(cmd, env, log_prefix):
         cwd=AOSP_ROOT,
         env=cmd_env)
 
-    log_std_out(proc, log_prefix)
+    log_std_out(proc)
     proc.wait()
     if proc.returncode != 0:
         raise Exception("Failed to run %s - %s" %
@@ -94,9 +88,16 @@ def install_deps():
 def is_presubmit(build_id):
     return build_id.startswith("P")
 
+def config_logging():
+    ch = logging.StreamHandler()
+    ch.setFormatter(TimeFormatter("%(asctime)s %(threadName)s | %(message)s"))
+    logging.root = logging.getLogger('build')
+    logging.root.setLevel(logging.INFO)
+    logging.root.addHandler(ch)
+    currentThread().setName('inf')
 
 def main(argv):
-    logging.basicConfig(format="%(message)s", level=logging.INFO)
+    config_logging()
     parser = argparse.ArgumentParser(
         description="Configures the android emulator cmake project so it can be build"
     )
@@ -119,9 +120,9 @@ def main(argv):
 
     args = parser.parse_args()
     version = "{0[0]}.{0[1]}.{0[2]}".format(sys.version_info)
-    log_line("inf", "Building on {} - {}, Python: {}".format(platform.system(),
-                                                             platform.uname(),
-                                                             version))
+    logging.info("Building on %s - %s, Python: %s", platform.system(),
+             platform.uname(),
+             version)
 
     target = platform.system().lower()
     if args.target:
@@ -151,10 +152,10 @@ def main(argv):
 
     # Kick of builds for 2 targets. (debug/release)
     with ServerConfig(is_presubmit(args.build_id)) as cfg:
-        run(launcher + cmd + prod, cfg.get_env(), "rel")
-        run(launcher + cmd + debug, cfg.get_env(), "dbg")
+        run(launcher + cmd + prod, cfg.get_env(), 'rel')
+        run(launcher + cmd + debug, cfg.get_env(), 'dbg')
 
-    log_line("inf", "Build completed!")
+    logging.info("Build completed!")
 
 
 if __name__ == "__main__":
