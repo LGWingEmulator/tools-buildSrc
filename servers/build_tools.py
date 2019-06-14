@@ -19,7 +19,6 @@ import argparse
 import json
 import logging
 import os
-import multiprocessing
 import platform
 import subprocess
 import sys
@@ -41,6 +40,7 @@ def _reader(pipe, queue):
     finally:
         queue.put(None)
 
+
 def log_std_out(proc):
     """Logs the output of the given process."""
     q = Queue()
@@ -49,6 +49,7 @@ def log_std_out(proc):
     for _ in range(2):
         for _, line in iter(q.get, None):
             logging.info(line)
+
 
 def run(cmd, env, log_prefix):
     currentThread().setName(log_prefix)
@@ -97,16 +98,6 @@ def config_logging():
 
 def main(argv):
     config_logging()
-
-    # We don't want to be too aggressive with concurrency.
-    test_cpu_count=int(multiprocessing.cpu_count() / 4)
-
-    # The build bots tend to be overloaded, so we want to restrict
-    # cpu usage to prevent strange timeout issues we have seen in the past.
-    # We can remove this once we are building on our own controlled macs
-    if platform.system() == 'Darwin':
-        test_cpu_count = 1
-
     parser = argparse.ArgumentParser(
         description="Configures the android emulator cmake project so it can be build"
     )
@@ -121,12 +112,6 @@ def main(argv):
         required=True,
         dest="build_id",
         help="The emulator build number")
-    parser.add_argument(
-        "--test_jobs",
-        type=int,
-        default=test_cpu_count,
-        dest="test_jobs",
-        help="Specifies  the number of tests to run simultaneously")
     parser.add_argument(
         "--target",
         type=str,
@@ -160,7 +145,7 @@ def main(argv):
     cmd = [
         "--noqtwebengine", "--noshowprefixforinfo", "--out", args.out_dir,
         "--sdk_build_number", args.build_id, "--target", target, "--dist",
-        args.dist_dir, "--test_jobs", str(args.test_jobs)
+        args.dist_dir
     ]
     prod = ["--crash", "prod"]
     debug = ["--config", "debug"]
