@@ -18,11 +18,14 @@ from __future__ import absolute_import, division, print_function
 import argparse
 import json
 import logging
-import os
 import multiprocessing
+import os
 import platform
+import site
 import subprocess
 import sys
+
+from distutils.spawn import find_executable
 from Queue import Queue
 from threading import Thread, currentThread
 
@@ -32,6 +35,8 @@ from time_formatter import TimeFormatter
 AOSP_ROOT = os.path.abspath(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", ".."))
 TOOLS = os.path.join(AOSP_ROOT, "tools")
+PYTHON_EXE = sys.executable or "python"
+
 
 def _reader(pipe, queue):
     try:
@@ -40,6 +45,7 @@ def _reader(pipe, queue):
                 queue.put((pipe, line[:-1]))
     finally:
         queue.put(None)
+
 
 def log_std_out(proc):
     """Logs the output of the given process."""
@@ -50,15 +56,16 @@ def log_std_out(proc):
         for _, line in iter(q.get, None):
             logging.info(line)
 
-def run(cmd, env, log_prefix):
+
+def run(cmd, env, log_prefix, cwd=AOSP_ROOT):
     currentThread().setName(log_prefix)
     cmd_env = os.environ.copy()
     cmd_env.update(env)
     is_windows = (platform.system() == "Windows")
 
     logging.info("=" * 140)
-    logging.info(json.dumps(cmd_env,sort_keys=True))
-    logging.info(" ".join(cmd))
+    logging.info(json.dumps(cmd_env, sort_keys=True))
+    logging.info("%s $> %s", cwd, " ".join(cmd))
     logging.info("=" * 140)
 
     proc = subprocess.Popen(
@@ -66,7 +73,7 @@ def run(cmd, env, log_prefix):
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         shell=is_windows,  # Make sure windows propagates ENV vars properly.
-        cwd=AOSP_ROOT,
+        cwd=cwd,
         env=cmd_env)
 
     log_std_out(proc)
@@ -77,15 +84,19 @@ def run(cmd, env, log_prefix):
 
 
 def install_deps():
-    run([
-        "python",
-        os.path.join(AOSP_ROOT, "external", "qemu", "android", "build", "python",
-                     "setup.py"), "develop", "--user"
-    ], {}, "dep")
+    # It is possible that the USER_SITE dir has never been created on freshly minted
+    # windows build bots. Since python's setuptools doesn't create it for us, we do it
+    # if needed.
+    if not os.path.exists(site.USER_SITE):
+        os.makedirs(site.USER_SITE, exists_ok=True)
+
+    run([PYTHON_EXE, "setup.py", "develop", "--user"
+         ], {}, "dep", os.path.join(AOSP_ROOT, "external", "qemu", "android", "build", "python"))
 
 
 def is_presubmit(build_id):
     return build_id.startswith("P")
+
 
 def config_logging():
     ch = logging.StreamHandler()
@@ -95,11 +106,12 @@ def config_logging():
     logging.root.addHandler(ch)
     currentThread().setName('inf')
 
+
 def main(argv):
     config_logging()
 
     # We don't want to be too aggressive with concurrency.
-    test_cpu_count=int(multiprocessing.cpu_count() / 4)
+    test_cpu_count = int(multiprocessing.cpu_count() / 4)
 
     # The build bots tend to be overloaded, so we want to restrict
     # cpu usage to prevent strange timeout issues we have seen in the past.
@@ -135,9 +147,11 @@ def main(argv):
 
     args = parser.parse_args()
     version = "{0[0]}.{0[1]}.{0[2]}".format(sys.version_info)
-    logging.info("Building on %s - %s, Python: %s", platform.system(),
-             platform.uname(),
-             version)
+    logging.info("Building with %s on %s - %s, Python: %s",
+                 PYTHON_EXE,
+                 platform.system(),
+                 platform.uname(),
+                 version)
 
     target = platform.system().lower()
     if args.target:
@@ -150,11 +164,10 @@ def main(argv):
     install_deps()
 
     # This how we are going to launch the python build script
-    launcher = [
-        "python",
-        os.path.join(AOSP_ROOT, "external", "qemu", "android", "build", "python",
-                     "cmake.py")
-    ]
+    launcher = [PYTHON_EXE,
+                os.path.join(AOSP_ROOT, "external", "qemu", "android", "build", "python",
+                             "cmake.py")
+                ]
 
     # Standard arguments for both debug & production.
     cmd = [
