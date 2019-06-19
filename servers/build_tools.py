@@ -88,7 +88,7 @@ def install_deps():
     # windows build bots. Since python's setuptools doesn't create it for us, we do it
     # if needed.
     if not os.path.exists(site.USER_SITE):
-        os.makedirs(site.USER_SITE, exists_ok=True)
+        os.makedirs(site.USER_SITE)
 
     run([PYTHON_EXE, "setup.py", "develop", "--user"
          ], {}, "dep", os.path.join(AOSP_ROOT, "external", "qemu", "android", "build", "python"))
