@@ -144,6 +144,10 @@ def main(argv):
         type=str,
         default=platform.system(),
         help="The build target, defaults to current os")
+    parser.add_argument(
+        "--qtwebengine",
+        action='store_true',
+        help="Build emulator with QtWebEngine libraries")
 
     args = parser.parse_args()
     version = "{0[0]}.{0[1]}.{0[2]}".format(sys.version_info)
@@ -170,8 +174,12 @@ def main(argv):
                 ]
 
     # Standard arguments for both debug & production.
+    if args.qtwebengine:
+        qtwebengine_arg = "--qtwebengine"
+    else:
+        qtwebengine_arg = "--noqtwebengine"
     cmd = [
-        "--noqtwebengine", "--noshowprefixforinfo", "--out", args.out_dir,
+        qtwebengine_arg, "--noshowprefixforinfo", "--out", args.out_dir,
         "--sdk_build_number", args.build_id, "--target", target, "--dist",
         args.dist_dir, "--test_jobs", str(args.test_jobs)
     ]
