@@ -148,6 +148,10 @@ def main(argv):
         "--qtwebengine",
         action='store_true',
         help="Build emulator with QtWebEngine libraries")
+    parser.add_argument(
+        "--gfxstream",
+        action='store_true',
+        help="Build gfxstream libraries")
 
     args = parser.parse_args()
     version = "{0[0]}.{0[1]}.{0[2]}".format(sys.version_info)
@@ -173,6 +177,8 @@ def main(argv):
                              "cmake.py")
                 ]
 
+    gfxstream_arg = "--gfxstream"
+
     # Standard arguments for both debug & production.
     if args.qtwebengine:
         qtwebengine_arg = "--qtwebengine"
@@ -185,6 +191,9 @@ def main(argv):
     ]
     prod = ["--crash", "prod"]
     debug = ["--config", "debug"]
+
+    if args.gfxstream:
+        cmd.append(gfxstream_arg)
 
     # Kick of builds for 2 targets. (debug/release)
     with ServerConfig(is_presubmit(args.build_id)) as cfg:
