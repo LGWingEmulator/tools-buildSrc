@@ -152,6 +152,10 @@ def main(argv):
         "--gfxstream",
         action='store_true',
         help="Build gfxstream libraries")
+    parser.add_argument(
+        "--crosvm",
+        action='store_true',
+        help="Build crosvm")
 
     args = parser.parse_args()
     version = "{0[0]}.{0[1]}.{0[2]}".format(sys.version_info)
@@ -178,6 +182,7 @@ def main(argv):
                 ]
 
     gfxstream_arg = "--gfxstream"
+    crosvm_arg = "--crosvm"
 
     # Standard arguments for both debug & production.
     if args.qtwebengine:
@@ -194,11 +199,14 @@ def main(argv):
 
     if args.gfxstream:
         cmd.append(gfxstream_arg)
+    if args.crosvm:
+        cmd.append(crosvm_arg)
 
     # Kick of builds for 2 targets. (debug/release)
     with ServerConfig(is_presubmit(args.build_id)) as cfg:
         run(launcher + cmd + prod, cfg.get_env(), 'rel')
-        run(launcher + cmd + debug, cfg.get_env(), 'dbg')
+        if not args.gfxstream and not args.crosvm:
+            run(launcher + cmd + debug, cfg.get_env(), 'dbg')
 
     logging.info("Build completed!")
 
